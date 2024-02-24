@@ -3,6 +3,8 @@ using System.Management;
 using System.Text.Json;
 using DetectiveSpecs;
 
+#pragma warning disable CA1869
+
 var specs = Enum.GetValues<Component>()
     .Aggregate(new Dictionary<Component, Dictionary<string, string>>(),
                (specs, component) =>
@@ -26,7 +28,7 @@ if (!HasAvailableSpace())
     throw new ApplicationException("Insufficient space for saving the results");
 
 File.WriteAllText(destinationPath, json);
-Console.WriteLine($"... Saved computer specs to {destinationPath}.");
+Console.WriteLine($"Saved computer specs to {destinationPath}.");
 Console.WriteLine("Press a key to exit.");
 Console.ReadKey();
 
@@ -44,7 +46,8 @@ bool TryGetValue(string key, ManagementBaseObject managementBaseObject, [NotNull
 {
     try
     {
-        value = Convert.ToString(managementBaseObject[key])?.Trim() ?? string.Empty;
+        object information = managementBaseObject[key];
+        value = Convert.ToString(information)?.Trim() ?? string.Empty;
         return true;
     }
     catch (ManagementException exception) when (exception.ErrorCode == ManagementStatus.NotFound)
