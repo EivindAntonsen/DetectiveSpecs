@@ -23,7 +23,7 @@ jobs:
         uses: NuGet/setup-nuget@v2.0.0
         
       - name: Configure github packages as nuget source
-        uses: dotnet nuget add source --username EivindAntonsen --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/EivindAntonsen/index.json"
+        run: dotnet nuget add source --username EivindAntonsen --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/EivindAntonsen/index.json"
 
       - name: Restore dependencies
         run: dotnet restore
