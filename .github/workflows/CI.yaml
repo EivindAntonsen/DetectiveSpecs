@@ -37,3 +37,8 @@ jobs:
           $outputDirectory = "${{ runner.workspace }}\Staging\Build"
           
           dotnet publish $project -c Release --output $outputDirectory
+
+      - name: Package and Push to GitHub Packages
+        run: |
+          dotnet pack --configuration Release --output .
+          dotnet nuget push "DetectiveSpecs.*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/EivindAntonsen/index.json"
