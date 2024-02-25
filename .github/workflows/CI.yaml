@@ -41,8 +41,23 @@ jobs:
           
           dotnet publish $project -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true --output $outputDirectory
 
-      - name: Package and Push to GitHub Packages
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: DetectiveSpecs
           path: ${{ runner.workspace }}/Staging/Build/
+          
+      - name: Create Github Release
+        run: |
+          $body = @{
+            tag_name = "v1.0.0"
+            target_commitish = "master"
+            name = "v1.0.0"
+            body = "Latest automated release of Detective Specs"
+            draft = $false
+            prerelease = $false
+            generate_release_notes = $false
+          } | ConvertTo-Json
+
+          Invoke-RestMethod -Uri "https://api.github.com/repos/EivindAntonsen/DetectiveSpecs/releases" -Method Post -Headers @{"Accept" = "application/vnd.github+json"; "Authorization" = "Bearer $env:GH_TOKEN"; "X-GitHub-Api-Version" = "2022-11-28"} -Body $body
+        shell: pwsh
