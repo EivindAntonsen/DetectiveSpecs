@@ -39,9 +39,10 @@ jobs:
           $project = 'DetectiveSpecs/DetectiveSpecs.csproj'
           $outputDirectory = "${{ runner.workspace }}\Staging\Build"
           
-          dotnet publish $project -c Release --output $outputDirectory
+          dotnet publish $project -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true --output $outputDirectory
 
       - name: Package and Push to GitHub Packages
-        run: |
-          dotnet pack --configuration Release --output .
-          dotnet nuget push "DetectiveSpecs.*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/EivindAntonsen/index.json"
+        uses: actions/upload-artifact$v4
+        with:
+          name: DetectiveSpecs
+          path: ${{ runner.workspace }}/Staging/Build/
