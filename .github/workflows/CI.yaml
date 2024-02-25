@@ -42,7 +42,7 @@ jobs:
           dotnet publish $project -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true --output $outputDirectory
 
       - name: Package and Push to GitHub Packages
-        uses: actions/upload-artifact$v4
+        uses: actions/upload-artifact@v4
         with:
           name: DetectiveSpecs
           path: ${{ runner.workspace }}/Staging/Build/
