@@ -10,11 +10,6 @@ Start-Sleep -Seconds 10
 $dirPath = "${workspace}/Staging/Build/"
 $zipFilePath = "${workspace}/Staging/Build/DetectiveSpecs.exe"
 
-If(Test-path $zipFilePath)
-{
-    Remove-Item $zipFilePath
-}
-
 [System.IO.Compression.ZipFile]::CreateFromDirectory($dirPath, $zipFilePath)
 
 $assetFileName = [System.IO.Path]::GetFileName($zipFilePath)
