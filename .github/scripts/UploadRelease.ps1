@@ -2,18 +2,16 @@
     [String]$accessToken,
     [String]$workspace,
     [String]$repository,
-    [String]$releaseId
+    [String]$releaseId,
+    [String]$version
 )
 
 Start-Sleep -Seconds 10
 
 $dirPath = "${workspace}/Staging/Build/"
-$zipFilePath = "${workspace}/Staging/Build/DetectiveSpecs.exe"
-
+$zipFilePath = "${workspace}/Staging/Build/DetectiveSpecs-v${version}.exe"
 [System.IO.Compression.ZipFile]::CreateFromDirectory($dirPath, $zipFilePath)
-
 $assetFileName = [System.IO.Path]::GetFileName($zipFilePath)
-
 $uri = "https://uploads.github.com/repos/${repository}/releases/${releaseId}/assets?name=${assetFileName}"
 
 $headers = @{

@@ -70,9 +70,10 @@ jobs:
       - name: Publish
         run: |
           $project = 'DetectiveSpecs/DetectiveSpecs.csproj'
-          $outputDirectory = "${{ runner.workspace }}\Staging\Build"
+          $filename = "DetectiveSpecs-v${env:VERSION}.exe"
+          $output = "${{ runner.workspace }}\Staging\Build\$filename"
           
-          dotnet publish $project -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true --output $outputDirectory
+          dotnet publish $project -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true --output $output
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -84,9 +85,7 @@ jobs:
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           VERSION: ${{ env.VERSION }}
-        run: |
-          Write-Host "Version is " + $env:VERSION
-          pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version $env:VERSION
+        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version $env:VERSION
         shell: pwsh
 
       - name: Upload Release Asset
@@ -94,5 +93,5 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           VERSION: ${{ env.VERSION }}
           RELEASE_ID: ${{ env.RELEASE_ID }}
-        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId $env:RELEASE_ID
+        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId $env:RELEASE_ID -version $env:VERSION
         shell: pwsh
