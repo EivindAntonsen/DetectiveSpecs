@@ -12,7 +12,7 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
 
       - name: Extract version
         id: getversion
@@ -26,29 +26,30 @@ jobs:
         run: |
           $uri = "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${env:VERSION}"
           try {
-              $versionExists = Invoke-RestMethod -Method Get -Headers @{ Authorization = "Bearer $env:ACCESS_TOKEN" } -Uri $uri
+              $response = Invoke-RestMethod -Method Get -Headers @{ Authorization = "Bearer $env:ACCESS_TOKEN" } -Uri $uri
               Write-Output "Version already exists"
+              Add-Content -Path $env:GITHUB_ENV -Value "RELEASE_ID=$($response.id)"
               exit 1
           }
           catch {
               if ($_.Exception.Response.StatusCode -eq 404) {
                 Write-Output "Version does not exist, safe to continue"
-            }
-            else {
-              throw
-            }
+              }
+              else {
+                throw
+              }
           }
         shell: pwsh
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Setup .NET 8.0
-        uses: actions/setup-dotnet@v4.0.0
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
       - name: Setup NuGet.exe for use with actions
-        uses: NuGet/setup-nuget@v2.0.0
+        uses: NuGet/setup-nuget@v2
 
       - name: Configure github packages as nuget source
         env:
@@ -91,6 +92,7 @@ jobs:
       - name: Upload Release Asset
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          VERSION: $env:VERSION
-        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId $env:VERSION
+          VERSION: ${{ env.VERSION }}
+          RELEASE_ID: ${{ env.RELEASE_ID }}
+        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId $env:RELEASE_ID
         shell: pwsh
