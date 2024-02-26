@@ -80,18 +80,13 @@ jobs:
         with:
           name: DetectiveSpecs
           path: ${{ runner.workspace }}/Staging/Build/
-
-      - name: Create Github Release
+          
+      - name: Create Github Release (CLI)
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           VERSION: ${{ env.VERSION }}
-        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version $env:VERSION
-        shell: pwsh
-
-      - name: Upload Release Asset
-        env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          VERSION: ${{ env.VERSION }}
-          RELEASE_ID: ${{ env.RELEASE_ID }}
-        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId $env:RELEASE_ID -version $env:VERSION
-        shell: pwsh
+        run: |
+          echo $env:ACCESS_TOKEN | gh auth login --with-token
+          
+          $assetPath = ${{ runner.workspace }}/Staging/Build/DetectiveSpecs-v$env:VERSION.exe
+          gh release create ("v" + "$env:VERSION) "$assetPath" --repo ${{ github.repository }} --title ("Release v" + "$env:VERSION") --notes "Automated release for v$env:VERSION"
