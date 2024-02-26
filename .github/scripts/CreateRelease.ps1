@@ -5,7 +5,7 @@
 )
 
 $body = @{
-    tag_name = "v$version"
+    tag_name = "v" + $version
     target_commitish = "master"
     name = $version
     body = "Latest automated release of Detective Specs"
