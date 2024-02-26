@@ -2,6 +2,13 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DetectiveSpecs", "DetectiveSpecs\DetectiveSpecs.csproj", "{238F5CF5-946C-4EC5-8384-26BF1C08211A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{F8231A00-FE52-4869-A97E-DBD7C7F50027}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\CI.yaml = .github\workflows\CI.yaml
+		.github\scripts\CreateRelease.ps1 = .github\scripts\CreateRelease.ps1
+		.github\scripts\UploadRelease.ps1 = .github\scripts\UploadRelease.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

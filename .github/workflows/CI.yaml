@@ -13,6 +13,27 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
+        
+      - name: Extract version
+        id: getversion
+        run: |
+          $xml = [xml](Get-Content path\to\your\.csproj)
+          $version = $xml.Project.PropertyGroup.Version
+          echo "::set-output name=VERSION::$version"
+        shell: pwsh
+
+      - name: Check version
+        run: |
+          $uri = "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${{ steps.getversion.outputs.VERSION }}"
+          $versionExists = Invoke-RestMethod -Method Get -Headers @{ Authorization = "Bearer $env:ACCESS_TOKEN" } -Uri $uri
+          
+          if ($null -ne $versionExists.name) {
+            Write-Output "Version already exists"
+            exit 1
+          }
+        shell: pwsh
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Setup .NET 8.0
         uses: actions/setup-dotnet@v4.0.0
@@ -50,53 +71,11 @@ jobs:
       - name: Create Github Release
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: |
-          $body = @{
-            tag_name = "v1.0.0"
-            target_commitish = "master"
-            name = "v1.0.0"
-            body = "Latest automated release of Detective Specs"
-            draft = $false
-            prerelease = $false
-            generate_release_notes = $false
-          } | ConvertTo-Json
-          
-          $uri = "https://api.github.com/repos/EivindAntonsen/DetectiveSpecs/releases"
-          $accept = "application/vnd.github+json"
-
-          Invoke-RestMethod -Uri $uri -Method Post -Headers @{"Accept" = $accept; "Authorization" = "Bearer $env:ACCESS_TOKEN"; "X-GitHub-Api-Version" = "2022-11-28"} -Body $body
+        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version v${{ steps.getversion.outputs.VERSION }}
         shell: pwsh
 
       - name: Upload Release Asset
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: |
-          Start-Sleep -Seconds 10
-          
-          $dirPath = "${{ runner.workspace }}/Staging/Build/"
-          $zipFilePath = "${{ runner.workspace }}/Staging/Build.zip"
-          
-          If(Test-path $zipFilePath)
-          {
-            Remove-Item $zipFilePath
-          }
-          
-          [System.IO.Compression.ZipFile]::CreateFromDirectory($dirPath, $zipFilePath)
-          
-          $releaseId = "1.0.0"
-          $assetFileName = [System.IO.Path]::GetFileName($zipFilePath)
-          $repo_full_name="EivindAntonsen/DetectiveSpecs"
-
-          $uri = "https://uploads.github.com/repos/${repo_full_name}/releases/${releaseId}/assets?name=${assetFileName}"
-          
-          $headers = @{
-                "Accept" = "application/vnd.github+json"
-                "Authorization" = "Bearer $env:ACCESS_TOKEN"
-                "X-GitHub-Api-Version" = "2022-11-28"
-                "Content-Type" = "application/octet-stream"
-            }
-
-          $fileBytes = [System.IO.File]::ReadAllBytes($assetFilePath)
-
-          Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $fileBytes
+        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId v${{ steps.getversion.outputs.VERSION }}
         shell: pwsh
