@@ -13,7 +13,7 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
-        
+
       - name: Extract version
         id: getversion
         run: |
@@ -25,11 +25,18 @@ jobs:
       - name: Check version
         run: |
           $uri = "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${env:VERSION}"
-          $versionExists = Invoke-RestMethod -Method Get -Headers @{ Authorization = "Bearer $env:ACCESS_TOKEN" } -Uri $uri
-      
-          if ($null -ne $versionExists.name) {
-            Write-Output "Version already exists"
-            exit 1
+          try {
+              $versionExists = Invoke-RestMethod -Method Get -Headers @{ Authorization = "Bearer $env:ACCESS_TOKEN" } -Uri $uri
+              Write-Output "Version already exists"
+              exit 1
+          }
+          catch {
+              if ($_.Exception.Response.StatusCode -eq 404) {
+                Write-Output "Version does not exist, safe to continue"
+            }
+            else {
+              throw
+            }
           }
         shell: pwsh
         env:
@@ -75,11 +82,13 @@ jobs:
       - name: Create Github Release
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version v${{ steps.getversion.outputs.VERSION }}
+          VERSION: $env:VERSION
+        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version v$env:VERSION
         shell: pwsh
 
       - name: Upload Release Asset
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId v${{ steps.getversion.outputs.VERSION }}
+          VERSION: $env:VERSION
+        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId v$env:VERSION
         shell: pwsh
