@@ -82,8 +82,10 @@ jobs:
       - name: Create Github Release
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          VERSION: $env:VERSION
-        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version $env:VERSION
+          VERSION: ${{ env.VERSION }}
+        run: |
+          Write-Host "Version is " + $env:VERSION
+          pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version $env:VERSION
         shell: pwsh
 
       - name: Upload Release Asset
