@@ -17,17 +17,16 @@ jobs:
       - name: Extract version
         id: getversion
         run: |
-          $xml = [xml](DetectiveSpecs/DetectiveSpecs.csproj)
+          $xml = [xml](Get-Content DetectiveSpecs/DetectiveSpecs.csproj)
           $version = $xml.Project.PropertyGroup.Version
-          
-          echo "::set-output name=VERSION::$version"
+          Add-Content -Path $env:GITHUB_ENV -Value "VERSION=$version"
         shell: pwsh
 
       - name: Check version
         run: |
-          $uri = "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${{ steps.getversion.outputs.VERSION }}"
+          $uri = "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${env:VERSION}"
           $versionExists = Invoke-RestMethod -Method Get -Headers @{ Authorization = "Bearer $env:ACCESS_TOKEN" } -Uri $uri
-          
+      
           if ($null -ne $versionExists.name) {
             Write-Output "Version already exists"
             exit 1
