@@ -83,7 +83,7 @@ jobs:
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           VERSION: $env:VERSION
-        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version v$env:VERSION
+        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -repository "EivindAntonsen/DetectiveSpecs" -version v${{ env:VERSION }}
         shell: pwsh
 
       - name: Upload Release Asset
