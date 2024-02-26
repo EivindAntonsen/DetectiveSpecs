@@ -1,6 +1,5 @@
 ﻿param(
     [String]$accessToken,
-    [String]$repository,
     [String]$version
 )
 
@@ -14,7 +13,7 @@ $body = @{
     generate_release_notes = $false
 } | ConvertTo-Json
 
-$uri = "https://api.github.com/repos/${repository}/releases"
+$uri = "https://api.github.com/repos/DetectiveSpecs/releases"
 $accept = "application/vnd.github+json"
 
 Invoke-RestMethod -Uri $uri -Method Post -Headers @{"Accept" = $accept; "Authorization" = "Bearer $accessToken"; "X-GitHub-Api-Version" = "2022-11-28"} -Body $body

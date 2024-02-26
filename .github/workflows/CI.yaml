@@ -83,15 +83,8 @@ jobs:
           name: DetectiveSpecs
           path: ${{ runner.workspace }}/Staging/Build/
           
-      - name: Create Github Release (CLI)
+      - name: Create Github Release
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           VERSION: ${{ env.VERSION }}
-        run: |
-          echo "$env:ACCESS_TOKEN" | gh auth login --with-token
-          
-          $filename = "DetectiveSpecs-v${env:VERSION}.exe"
-          $assetPath = "${{ runner.workspace }}\Staging\Build\$filename"
-          
-          gh release create "v$env:VERSION" $assetPath --repo ${{ github.repository }} `
-          --title "Release v$env:VERSION" --notes "Release notes for v$env:VERSION"
+        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -version $env:VERSION
