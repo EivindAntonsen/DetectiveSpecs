@@ -88,5 +88,5 @@ jobs:
         run: |
           echo $env:ACCESS_TOKEN | gh auth login --with-token
           
-          $assetPath = ${{ runner.workspace }}/Staging/Build/DetectiveSpecs-v$env:VERSION.exe
+          $assetPath = "${{ runner.workspace }}/Staging/Build/DetectiveSpecs-v${env:VERSION}.exe"
           gh release create ("v" + "$env:VERSION) "$assetPath" --repo ${{ github.repository }} --title ("Release v" + "$env:VERSION") --notes "Automated release for v$env:VERSION"
