@@ -6,8 +6,6 @@
     [String]$version
 )
 
-Start-Sleep -Seconds 10
-
 $dirPath = "${workspace}/Staging/Build/"
 $zipFilePath = "${workspace}/Staging/Build/DetectiveSpecs-v${version}.exe"
 [System.IO.Compression.ZipFile]::CreateFromDirectory($dirPath, $zipFilePath)
