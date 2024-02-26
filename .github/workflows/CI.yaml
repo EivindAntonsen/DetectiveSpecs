@@ -86,7 +86,10 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           VERSION: ${{ env.VERSION }}
         run: |
-          echo $env:ACCESS_TOKEN | gh auth login --with-token
+          echo "$env:ACCESS_TOKEN" | gh auth login --with-token
           
-          $assetPath = "${{ runner.workspace }}/Staging/Build/DetectiveSpecs-v${env:VERSION}.exe"
-          gh release create ("v" + "$env:VERSION) "$assetPath" --repo ${{ github.repository }} --title ("Release v" + "$env:VERSION") --notes "Automated release for v$env:VERSION"
+          $filename = "DetectiveSpecs-v${env:VERSION}.exe"
+          $assetPath = "${{ runner.workspace }}/Build/Staging/$filename"
+          
+          gh release create "v$env:VERSION" $assetPath --repo ${{ github.repository }} `
+          --title "Release v$env:VERSION" --notes "Release notes for v$env:VERSION"
