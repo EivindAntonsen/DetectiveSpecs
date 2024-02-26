@@ -51,11 +51,11 @@ jobs:
         uses: NuGet/setup-nuget@v2.0.0
 
       - name: Configure github packages as nuget source
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
-          $password = ${{ secrets.GITHUB_TOKEN }}
-          $uri = "https://nuget.pkg.github.com/EivindAntonsen/index.json"
-          
-          dotnet nuget add source --username EivindAntonsen --password $password --store-password-in-clear-text --name github $uri
+          $uri = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+          dotnet nuget add source --username ${{ github.actor }} --password $env:ACCESS_TOKEN --store-password-in-clear-text --name github $uri
 
       - name: Restore dependencies
         run: dotnet restore
