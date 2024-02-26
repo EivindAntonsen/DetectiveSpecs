@@ -17,8 +17,9 @@ jobs:
       - name: Extract version
         id: getversion
         run: |
-          $xml = [xml](Get-Content path\to\your\.csproj)
+          $xml = [xml](DetectiveSpecs/DetectiveSpecs.csproj)
           $version = $xml.Project.PropertyGroup.Version
+          
           echo "::set-output name=VERSION::$version"
         shell: pwsh
 
@@ -44,7 +45,11 @@ jobs:
         uses: NuGet/setup-nuget@v2.0.0
 
       - name: Configure github packages as nuget source
-        run: dotnet nuget add source --username EivindAntonsen --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/EivindAntonsen/index.json"
+        run: |
+          $password = ${{ secrets.GITHUB_TOKEN }}
+          $uri = "https://nuget.pkg.github.com/EivindAntonsen/index.json"
+          
+          dotnet nuget add source --username EivindAntonsen --password $password --store-password-in-clear-text --name github $uri
 
       - name: Restore dependencies
         run: dotnet restore
