@@ -90,5 +90,5 @@ jobs:
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           VERSION: $env:VERSION
-        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId v$env:VERSION
+        run: pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -repository "EivindAntonsen/DetectiveSpecs" -releaseId $env:VERSION
         shell: pwsh
