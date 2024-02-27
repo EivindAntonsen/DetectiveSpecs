@@ -12,14 +12,14 @@ $body = @{
     make_latest = $true
 } | ConvertTo-Json
 
+$uri = "https://api.github.com/repos/DetectiveSpecs/releases"
+$accept = "application/vnd.github+json"
+
 $headers = @{
     "Accept" = $accept; 
     "Authorization" = "Bearer $accessToken"; 
     "X-GitHub-Api-Version" = "2022-11-28"
 }
-
-$uri = "https://api.github.com/repos/DetectiveSpecs/releases"
-$accept = "application/vnd.github+json"
 
 Write-Host $uri
 Write-Host $body
