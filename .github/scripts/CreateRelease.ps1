@@ -21,8 +21,6 @@ $headers = @{
     "X-GitHub-Api-Version" = "2022-11-28"
 }
 
-Write-Host $uri
-Write-Host $body
-Write-Host $headers
-
-Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
+$response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
+$id = $response.id
+echo "RELEASE_ID=$id" | Out-File -FilePath $env:GITHUB_ENV -Append

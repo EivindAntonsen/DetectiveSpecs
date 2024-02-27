@@ -1,7 +1,6 @@
 ﻿param(
     [String]$accessToken,
     [String]$workspace,
-    [String]$repository,
     [String]$releaseId,
     [String]$version
 )
@@ -19,7 +18,7 @@ $entry = $zip.CreateEntryFromFile($exeFilePath, $relativePath, $compressionLevel
 $zip.Dispose()
 
 $assetFileName = [System.IO.Path]::GetFileName($zipFilePath)
-$uri = "https://uploads.github.com/repos/${repository}/releases/${releaseId}/assets?name=${assetFileName}"
+$uri = "https://uploads.github.com/repos/EivindAntonsen/DetectiveSpecs/releases/${releaseId}/assets?name=${assetFileName}"
   
 $headers = @{
     "Accept" = "application/vnd.github+json"

@@ -88,3 +88,10 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           VERSION: ${{ env.VERSION }}
         run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -version $env:VERSION
+        
+      - name: Upload Asset to Release
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          VERSION: ${{ env.VERSION }}
+          RELEASE_ID: ${{ env.RELEASE_ID }}
+        run : pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -releaseId $env:RELEASE_ID -version $env:VERSION
