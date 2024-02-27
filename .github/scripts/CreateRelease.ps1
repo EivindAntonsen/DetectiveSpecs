@@ -4,11 +4,11 @@
 )
 
 $body = @{
-    tag_name = "v" + $version
-    target_commitish = "master"
-    draft = $false
-    prerelease = $false
-    generate_release_notes = $true,
+    tag_name = "v" + $version;
+    target_commitish = "master";
+    draft = $false;
+    prerelease = $false;
+    generate_release_notes = $true;
     make_latest = $true
 } | ConvertTo-Json
 
