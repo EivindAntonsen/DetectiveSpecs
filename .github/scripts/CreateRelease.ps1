@@ -12,7 +12,7 @@ $body = @{
     make_latest = $true
 } | ConvertTo-Json
 
-$uri = "https://api.github.com/repos/DetectiveSpecs/releases"
+$uri = "https://api.github.com/repos/EivindAntonsen/DetectiveSpecs/releases"
 $accept = "application/vnd.github+json"
 
 $headers = @{
