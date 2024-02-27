@@ -16,4 +16,6 @@ $body = @{
 $uri = "https://api.github.com/repos/DetectiveSpecs/releases"
 $accept = "application/vnd.github+json"
 
+Write-Host $uri
+
 Invoke-RestMethod -Uri $uri -Method Post -Headers @{"Accept" = $accept; "Authorization" = "Bearer $accessToken"; "X-GitHub-Api-Version" = "2022-11-28"} -Body $body
