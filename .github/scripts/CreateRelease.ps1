@@ -9,7 +9,7 @@ $body = @{
     draft = $false;
     prerelease = $false;
     generate_release_notes = $true;
-    make_latest = $true
+    make_latest = "true"
 } | ConvertTo-Json
 
 $uri = "https://api.github.com/repos/EivindAntonsen/DetectiveSpecs/releases"
