@@ -29,7 +29,7 @@ $headers = @{
 }
 
 # Read file data as bytes
-$fileContent = Get-Content -Path $zipFilePath -Encoding Byte
+$fileContent = [System.IO.File]::ReadAllBytes($zipFilePath)
 
 # Make API request to upload file
 Invoke-RestMethod -Method 'POST' -Uri $uri -Headers $headers -Body $fileContent
