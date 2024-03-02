@@ -11,49 +11,38 @@ internal static class Program
     public static void Main(string[] args)
     {
         Console.WriteLine("Starting work on detecting components");
-        var specs = Enum.GetValues<Component>()
+
+        
+
+        var specs = Enum
+            .GetValues<Component>()
             .Aggregate(new Dictionary<Component, List<Dictionary<string, string>>>(),
-                       (specs, component) =>
+                       (pcSpecs, component) =>
                        {
-                           Console.Write("Searching for information about ");
-                           Console.ForegroundColor = ConsoleColor.Yellow;
-                           Console.Write($"{component}");
-                           Console.ResetColor();
-                           Console.WriteLine();
-                           specs[component] = [];
+                           LogComponentSearch(component);
+                           pcSpecs[component] = [];
 
                            string searchQuery = Queries.ForComponent(component);
                            ManagementObjectSearcher searcher = CreateManagementObjectSearcherByQuery(searchQuery);
 
                            foreach (ManagementBaseObject managementBaseObject in searcher.Get())
                            {
-                               var dictionary = component.GetSearchTerms()
-                                   .Aggregate(new Dictionary<string, string>(),
-                                              (dictionary, key) =>
-                                              {
-                                                  if (TryGetValue(key, managementBaseObject, out string? value))
-                                                      dictionary[key] = value;
+                               var componentProperties = new Dictionary<string, string>();
 
-                                                  return dictionary;
-                                              });
+                               foreach (string term in component.GetSearchTerms())
+                                   if (TryGetValue(term, managementBaseObject, out string? property))
+                                       componentProperties[term] = property;
 
-                               Console.Write("[");
-                               Console.ForegroundColor = ConsoleColor.DarkCyan;
-                               Console.Write($"{dictionary.GetValueOrDefault("Name")}");
-                               Console.ResetColor();
-                               Console.Write($"]: Found {dictionary.Count} component properties");
-                               Console.WriteLine();
-
-                               specs[component].Add(dictionary);
+                               pcSpecs[component].Add(componentProperties);
                            }
 
-                           return specs;
+                           return pcSpecs;
                        });
 
         RemoveNonPhysicalNetworkAdapters(ref specs);
 
         string json = SerializeToJson(specs);
-        string? destinationPath = GetDestinationPath();
+        string destinationPath = GetDestinationPath();
 
         if (!HasAvailableSpace(destinationPath, json))
             throw new ApplicationException("Insufficient space for saving the results");
@@ -62,8 +51,6 @@ internal static class Program
         Console.WriteLine($"Saved computer specs to {destinationPath}.");
         Console.WriteLine("Press a key to exit.");
         Console.ReadKey();
-
-        return;
     }
 
 
@@ -125,6 +112,29 @@ internal static class Program
     {
         dict[Component.Network].RemoveAll(dictionary =>
                                               dictionary.TryGetValue("PhysicalAdapter", out string? isPhysical) && isPhysical == "False");
+    }
+
+
+
+    private static void LogComponentSearch(Component component)
+    {
+        Console.Write("Searching for information about ");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write($"{component}");
+        Console.ResetColor();
+        Console.WriteLine();
+    }
+
+
+
+    private static void LogSearchResult(string propertyName, int propertyCount)
+    {
+        Console.Write("[");
+        Console.ForegroundColor = ConsoleColor.DarkCyan;
+        Console.Write($"{propertyName}");
+        Console.ResetColor();
+        Console.Write($"]: Found {propertyCount} component properties");
+        Console.WriteLine();
     }
 
 
