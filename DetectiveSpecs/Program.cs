@@ -9,10 +9,25 @@ namespace DetectiveSpecs;
 
 internal static class Program
 {
+    public static async Task Main(string[] args)
+    {
+        Console.WriteLine("Starting work on detecting components");
+
+        var computerSpecs = GetComputerSpecs();
+        var destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ComputerInfo");
+        var yamlPath = await FileWriter.WriteAsYaml(computerSpecs, destinationPath).ConfigureAwait(false);
+        var jsonPath = await FileWriter.WriteAsJson(computerSpecs, destinationPath).ConfigureAwait(false);
+        var paths = new List<string> { yamlPath, jsonPath };
+
+        Console.WriteLine($"Saved computer specs to {JsonSerializer.Serialize(paths)}.");
+        Console.WriteLine("Press a key to exit.");
+        Console.ReadKey();
+    }
+
+
+
     private static IEnumerable<Component> GetMultipleComponentsOfType(ComponentType componentType)
     {
-        LogComponentSearch(componentType);
-        
         var queryString = Queries.ForComponent(componentType);
         var searcher = new ManagementObjectSearcher(queryString);
 
@@ -21,7 +36,7 @@ internal static class Program
             var properties = new Dictionary<ComponentProperty, string>();
 
             foreach (var propertyName in componentType.GetPropertyNames())
-                if (TryGetValue(propertyName, managementBaseObject, out var propertyValue))
+                if (TryGetValue(propertyName, managementBaseObject, out var propertyValue) && !string.IsNullOrWhiteSpace(propertyValue))
                     properties.Add(propertyName, propertyValue);
 
             yield return new Component(properties);
@@ -32,8 +47,6 @@ internal static class Program
 
     private static Component? GetComponentOfType(ComponentType componentType)
     {
-        LogComponentSearch(componentType);
-        
         var queryString = Queries.ForComponent(componentType);
         var searcher = new ManagementObjectSearcher(queryString);
 
@@ -51,23 +64,6 @@ internal static class Program
                 properties.Add(propertyName, propertyValue);
 
         return new Component(properties);
-    }
-
-
-
-    public static async Task Main(string[] args)
-    {
-        Console.WriteLine("Starting work on detecting components");
-
-        var computerSpecs = GetComputerSpecs();
-        var destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ComputerInfo");
-        var yamlPath = await FileWriter.WriteAsYaml(computerSpecs, destinationPath).ConfigureAwait(false);
-        var jsonPath = await FileWriter.WriteAsJson(computerSpecs, destinationPath).ConfigureAwait(false);
-        var paths = new List<string> { yamlPath, jsonPath };
-
-        Console.WriteLine($"Saved computer specs to {JsonSerializer.Serialize(paths)}.");
-        Console.WriteLine("Press a key to exit.");
-        Console.ReadKey();
     }
 
 
@@ -96,12 +92,12 @@ internal static class Program
         try
         {
             var information = managementBaseObject[key.ToString()];
-            value = Convert.ToString(information)?.Trim() ?? string.Empty;
-            return true;
+            value = Convert.ToString(information)?.Trim();
+            return value is not null;
         }
         catch (ManagementException exception) when (exception.ErrorCode == ManagementStatus.NotFound)
         {
-            value = string.Empty;
+            value = null;
             return false;
         }
     }
@@ -110,10 +106,6 @@ internal static class Program
 
     private static void LogComponentSearch(ComponentType componentType)
     {
-        Console.Write("Searching for information about ");
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Write($"{componentType}");
-        Console.ResetColor();
-        Console.WriteLine();
+        
     }
 }
