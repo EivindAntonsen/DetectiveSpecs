@@ -1,4 +1,6 @@
-﻿namespace DetectiveSpecs;
+﻿using DetectiveSpecs.Models;
+
+namespace DetectiveSpecs;
 
 internal static class Queries
 {
@@ -15,18 +17,18 @@ internal static class Queries
 
 
 
-    public static string ForComponent(Component component) => component switch
+    public static string ForComponent(ComponentType componentType) => componentType switch
     {
-        Component.Motherboard => MoboQuery,
-        Component.Gpu => GpuQuery,
-        Component.Cpu => CpuQuery,
-        Component.Storage => DiskQuery,
-        Component.Memory => MemoryQuery,
-        Component.Optical => OpticalQuery,
-        Component.Network => NetworkQuery,
-        Component.Sound => SoundQuery,
-        Component.Keyboard => KeyboardQuery,
-        Component.Mouse => MouseQuery,
-        _ => throw new ArgumentOutOfRangeException(nameof(component))
+        ComponentType.Motherboard => MoboQuery,
+        ComponentType.Gpu => GpuQuery,
+        ComponentType.Cpu => CpuQuery,
+        ComponentType.Storage => DiskQuery,
+        ComponentType.Memory => MemoryQuery,
+        ComponentType.Optical => OpticalQuery,
+        ComponentType.Network => NetworkQuery,
+        ComponentType.Sound => SoundQuery,
+        ComponentType.Keyboard => KeyboardQuery,
+        ComponentType.Mouse => MouseQuery,
+        _ => throw new ArgumentOutOfRangeException(nameof(componentType))
     };
 }

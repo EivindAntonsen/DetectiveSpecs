@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Management;
 using System.Text.Json;
+using DetectiveSpecs.Models;
 
 #pragma warning disable CA1869
 
@@ -8,68 +9,93 @@ namespace DetectiveSpecs;
 
 internal static class Program
 {
-    public static void Main(string[] args)
+    private static IEnumerable<Component> GetMultipleComponentsOfType(ComponentType componentType)
+    {
+        LogComponentSearch(componentType);
+        
+        var queryString = Queries.ForComponent(componentType);
+        var searcher = new ManagementObjectSearcher(queryString);
+
+        foreach (var managementBaseObject in searcher.Get())
+        {
+            var properties = new Dictionary<ComponentProperty, string>();
+
+            foreach (var propertyName in componentType.GetPropertyNames())
+                if (TryGetValue(propertyName, managementBaseObject, out var propertyValue))
+                    properties.Add(propertyName, propertyValue);
+
+            yield return new Component(properties);
+        }
+    }
+
+
+
+    private static Component? GetComponentOfType(ComponentType componentType)
+    {
+        LogComponentSearch(componentType);
+        
+        var queryString = Queries.ForComponent(componentType);
+        var searcher = new ManagementObjectSearcher(queryString);
+
+        var managementBaseObject = searcher.Get()
+            .OfType<ManagementBaseObject>()
+            .FirstOrDefault();
+
+        if (managementBaseObject is null)
+            return null;
+
+        var properties = new Dictionary<ComponentProperty, string>();
+
+        foreach (var propertyName in componentType.GetPropertyNames())
+            if (TryGetValue(propertyName, managementBaseObject, out var propertyValue) && !string.IsNullOrWhiteSpace(propertyValue))
+                properties.Add(propertyName, propertyValue);
+
+        return new Component(properties);
+    }
+
+
+
+    public static async Task Main(string[] args)
     {
         Console.WriteLine("Starting work on detecting components");
 
-        
+        var computerSpecs = GetComputerSpecs();
+        var destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ComputerInfo");
+        var yamlPath = await FileWriter.WriteAsYaml(computerSpecs, destinationPath).ConfigureAwait(false);
+        var jsonPath = await FileWriter.WriteAsJson(computerSpecs, destinationPath).ConfigureAwait(false);
+        var paths = new List<string> { yamlPath, jsonPath };
 
-        var specs = Enum
-            .GetValues<Component>()
-            .Aggregate(new Dictionary<Component, List<Dictionary<string, string>>>(),
-                       (pcSpecs, component) =>
-                       {
-                           LogComponentSearch(component);
-                           pcSpecs[component] = [];
-
-                           string searchQuery = Queries.ForComponent(component);
-                           ManagementObjectSearcher searcher = CreateManagementObjectSearcherByQuery(searchQuery);
-
-                           foreach (ManagementBaseObject managementBaseObject in searcher.Get())
-                           {
-                               var componentProperties = new Dictionary<string, string>();
-
-                               foreach (string term in component.GetSearchTerms())
-                                   if (TryGetValue(term, managementBaseObject, out string? property))
-                                       componentProperties[term] = property;
-
-                               pcSpecs[component].Add(componentProperties);
-                           }
-
-                           return pcSpecs;
-                       });
-
-        RemoveNonPhysicalNetworkAdapters(ref specs);
-
-        string json = SerializeToJson(specs);
-        string destinationPath = GetDestinationPath();
-
-        if (!HasAvailableSpace(destinationPath, json))
-            throw new ApplicationException("Insufficient space for saving the results");
-
-        File.WriteAllText(destinationPath, json);
-        Console.WriteLine($"Saved computer specs to {destinationPath}.");
+        Console.WriteLine($"Saved computer specs to {JsonSerializer.Serialize(paths)}.");
         Console.WriteLine("Press a key to exit.");
         Console.ReadKey();
     }
 
 
 
-    private static string GetDestinationPath()
+    private static ComputerSpecs GetComputerSpecs() => new()
     {
-        string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        const string fileName = "ComputerInfo.json";
+        Cpu = GetComponentOfType(ComponentType.Cpu)
+              ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Cpu)}"),
+        Gpu = GetMultipleComponentsOfType(ComponentType.Gpu),
+        Motherboard = GetComponentOfType(ComponentType.Motherboard)
+                      ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Motherboard)}"),
+        Storage = GetMultipleComponentsOfType(ComponentType.Storage),
+        Memory = GetMultipleComponentsOfType(ComponentType.Memory),
+        Optical = GetMultipleComponentsOfType(ComponentType.Optical),
+        Network = GetMultipleComponentsOfType(ComponentType.Network)
+            .Where(component => component.Properties[ComponentProperty.PhysicalAdapter] == "True"),
+        Sound = GetMultipleComponentsOfType(ComponentType.Sound),
+        Keyboard = GetMultipleComponentsOfType(ComponentType.Keyboard),
+        Mouse = GetMultipleComponentsOfType(ComponentType.Mouse),
+    };
 
-        return Path.Combine(currentDirectory, fileName);
-    }
 
 
-
-    private static bool TryGetValue(string key, ManagementBaseObject managementBaseObject, [NotNullWhen(true)] out string? value)
+    private static bool TryGetValue(ComponentProperty key, ManagementBaseObject managementBaseObject, [NotNullWhen(true)] out string? value)
     {
         try
         {
-            object information = managementBaseObject[key];
+            var information = managementBaseObject[key.ToString()];
             value = Convert.ToString(information)?.Trim() ?? string.Empty;
             return true;
         }
@@ -82,62 +108,12 @@ internal static class Program
 
 
 
-    private static string SerializeToJson(object dict)
-    {
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        return JsonSerializer.Serialize(dict, options);
-    }
-
-
-
-    private static bool HasAvailableSpace(string destinationPath, string json)
-    {
-        Console.WriteLine("Checking for available space");
-        var driveInfo = new DriveInfo(Path.GetPathRoot(destinationPath)!);
-        int requiredSpace = json.Length * sizeof(char);
-
-        if (driveInfo.AvailableFreeSpace >= requiredSpace)
-        {
-            Console.WriteLine("Found sufficient space for saving results");
-            return true;
-        }
-
-        Console.WriteLine("Insufficient space for saving results");
-        return false;
-    }
-
-
-
-    private static void RemoveNonPhysicalNetworkAdapters(ref Dictionary<Component, List<Dictionary<string, string>>> dict)
-    {
-        dict[Component.Network].RemoveAll(dictionary =>
-                                              dictionary.TryGetValue("PhysicalAdapter", out string? isPhysical) && isPhysical == "False");
-    }
-
-
-
-    private static void LogComponentSearch(Component component)
+    private static void LogComponentSearch(ComponentType componentType)
     {
         Console.Write("Searching for information about ");
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Write($"{component}");
+        Console.Write($"{componentType}");
         Console.ResetColor();
         Console.WriteLine();
     }
-
-
-
-    private static void LogSearchResult(string propertyName, int propertyCount)
-    {
-        Console.Write("[");
-        Console.ForegroundColor = ConsoleColor.DarkCyan;
-        Console.Write($"{propertyName}");
-        Console.ResetColor();
-        Console.Write($"]: Found {propertyCount} component properties");
-        Console.WriteLine();
-    }
-
-
-
-    private static ManagementObjectSearcher CreateManagementObjectSearcherByQuery(string query) => new(query);
 }
