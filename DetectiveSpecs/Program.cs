@@ -16,14 +16,13 @@ internal static class Program
         Console.WriteLine("Starting work on detecting components");
 
         var computerSpecs = GetComputerSpecs();
-        
-        var destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ComputerInfo");
-        var jsonResultPath = await FileWriter.WriteAsJson(computerSpecs, destinationPath).ConfigureAwait(false);
-        var customFormatResultPath = await FileWriter.WriteAsCustomFormat(computerSpecs, destinationPath).ConfigureAwait(false);
-        
-        var paths = new List<string> { jsonResultPath, customFormatResultPath };
 
-        Console.WriteLine($"Saved computer specs to {JsonSerializer.Serialize(paths)}.");
+        var destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ComputerInfo");
+        var formattedText = ComputerSpecSerializer.Serialize(computerSpecs, destinationPath);
+        
+        await File.WriteAllTextAsync(destinationPath, formattedText).ConfigureAwait(false);
+
+        Console.WriteLine($"Saved computer specs to {formattedText}.");
         Console.WriteLine("Press a key to exit.");
         Console.ReadKey();
     }
