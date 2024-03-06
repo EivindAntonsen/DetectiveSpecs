@@ -3,26 +3,42 @@ using System.Management;
 using System.Text.Json;
 using DetectiveSpecs.Models;
 
+// ReSharper disable SwitchStatementMissingSomeEnumCasesNoDefault
+
 #pragma warning disable CA1869
 
 namespace DetectiveSpecs;
 
 internal static class Program
 {
-    public static async Task Main(string[] args)
+    public static async Task Main()
     {
         Console.WriteLine("Starting work on detecting components");
 
         var computerSpecs = GetComputerSpecs();
+        
         var destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ComputerInfo");
-        var yamlPath = await FileWriter.WriteAsYaml(computerSpecs, destinationPath).ConfigureAwait(false);
-        var jsonPath = await FileWriter.WriteAsJson(computerSpecs, destinationPath).ConfigureAwait(false);
-        var paths = new List<string> { yamlPath, jsonPath };
+        var jsonResultPath = await FileWriter.WriteAsJson(computerSpecs, destinationPath).ConfigureAwait(false);
+        var customFormatResultPath = await FileWriter.WriteAsCustomFormat(computerSpecs, destinationPath).ConfigureAwait(false);
+        
+        var paths = new List<string> { jsonResultPath, customFormatResultPath };
 
         Console.WriteLine($"Saved computer specs to {JsonSerializer.Serialize(paths)}.");
         Console.WriteLine("Press a key to exit.");
         Console.ReadKey();
     }
+
+
+
+    private static Dictionary<ComponentProperty, string> ReadComponentProperties(ComponentType componentType, ManagementBaseObject managementObject) => componentType
+        .GetPropertyNames()
+        .Aggregate(new Dictionary<ComponentProperty, string>(), (properties, propertyName) =>
+        {
+            if (TryGetValue(propertyName, managementObject, out var propertyValue) && !string.IsNullOrWhiteSpace(propertyValue))
+                properties.Add(propertyName, propertyValue);
+
+            return properties;
+        });
 
 
 
@@ -33,11 +49,7 @@ internal static class Program
 
         foreach (var managementBaseObject in searcher.Get())
         {
-            var properties = new Dictionary<ComponentProperty, string>();
-
-            foreach (var propertyName in componentType.GetPropertyNames())
-                if (TryGetValue(propertyName, managementBaseObject, out var propertyValue) && !string.IsNullOrWhiteSpace(propertyValue))
-                    properties.Add(propertyName, propertyValue);
+            var properties = ReadComponentProperties(componentType, managementBaseObject);
 
             yield return new Component(properties);
         }
@@ -50,18 +62,14 @@ internal static class Program
         var queryString = Queries.ForComponent(componentType);
         var searcher = new ManagementObjectSearcher(queryString);
 
-        var managementBaseObject = searcher.Get()
+        var searchResult = searcher.Get()
             .OfType<ManagementBaseObject>()
             .FirstOrDefault();
 
-        if (managementBaseObject is null)
+        if (searchResult is null)
             return null;
 
-        var properties = new Dictionary<ComponentProperty, string>();
-
-        foreach (var propertyName in componentType.GetPropertyNames())
-            if (TryGetValue(propertyName, managementBaseObject, out var propertyValue) && !string.IsNullOrWhiteSpace(propertyValue))
-                properties.Add(propertyName, propertyValue);
+        var properties = ReadComponentProperties(componentType, searchResult);
 
         return new Component(properties);
     }
@@ -100,12 +108,5 @@ internal static class Program
             value = null;
             return false;
         }
-    }
-
-
-
-    private static void LogComponentSearch(ComponentType componentType)
-    {
-        
     }
 }
