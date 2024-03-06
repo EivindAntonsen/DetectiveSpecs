@@ -1,4 +1,4 @@
-﻿namespace DetectiveSpecs.Models;
+﻿namespace DetectiveSpecs;
 
 public record ComputerSpecs
 {
