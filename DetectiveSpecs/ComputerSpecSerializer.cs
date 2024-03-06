@@ -1,31 +1,31 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Text;
 using DetectiveSpecs.Models;
 
 namespace DetectiveSpecs;
 
-[SuppressMessage("Performance", "CA1869:Cache and reuse \'JsonSerializerOptions\' instances")]
+
 public static class ComputerSpecSerializer
 {
     public static string Serialize(ComputerSpecs specs, string path)
     {
-        var sb = new StringBuilder();
-        var pad = Enum.GetValues<ComponentProperty>()
-            .Select(componentProperty => componentProperty.ToString().Length)
-            .Max();
+        var stringBuilder = new StringBuilder();
+        var padToLength = Enum
+            .GetValues<ComponentProperty>()
+            .Select(componentProperty => componentProperty.ToString())
+            .Max(s => s.Length);
 
-        AppendSingleComponent(ComponentType.Motherboard, specs.Motherboard, sb, pad);
-        AppendSingleComponent(ComponentType.Cpu, specs.Cpu, sb, pad);
-        AppendManyComponents(ComponentType.Gpu, specs.Gpu, sb, pad);
-        AppendManyComponents(ComponentType.Memory, specs.Memory, sb, pad);
-        AppendManyComponents(ComponentType.Storage, specs.Storage, sb, pad);
-        AppendManyComponents(ComponentType.Network, specs.Network, sb, pad);
-        AppendManyComponents(ComponentType.Optical, specs.Optical, sb, pad);
-        AppendManyComponents(ComponentType.Mouse, specs.Mouse, sb, pad);
-        AppendManyComponents(ComponentType.Keyboard, specs.Keyboard, sb, pad);
-        AppendManyComponents(ComponentType.Sound, specs.Sound, sb, pad);
+        AppendSingleComponent(ComponentType.Motherboard, specs.Motherboard, stringBuilder, padToLength);
+        AppendSingleComponent(ComponentType.Cpu, specs.Cpu, stringBuilder, padToLength);
+        AppendManyComponents(ComponentType.Gpu, specs.Gpu, stringBuilder, padToLength);
+        AppendManyComponents(ComponentType.Memory, specs.Memory, stringBuilder, padToLength);
+        AppendManyComponents(ComponentType.Storage, specs.Storage, stringBuilder, padToLength);
+        AppendManyComponents(ComponentType.Network, specs.Network, stringBuilder, padToLength);
+        AppendManyComponents(ComponentType.Optical, specs.Optical, stringBuilder, padToLength);
+        AppendManyComponents(ComponentType.Mouse, specs.Mouse, stringBuilder, padToLength);
+        AppendManyComponents(ComponentType.Keyboard, specs.Keyboard, stringBuilder, padToLength);
+        AppendManyComponents(ComponentType.Sound, specs.Sound, stringBuilder, padToLength);
 
-        return sb.ToString();
+        return stringBuilder.ToString();
     }
 
 

@@ -1,11 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Management;
-using System.Text.Json;
 using DetectiveSpecs.Models;
 
-// ReSharper disable SwitchStatementMissingSomeEnumCasesNoDefault
-
-#pragma warning disable CA1869
 
 namespace DetectiveSpecs;
 
@@ -19,25 +15,51 @@ internal static class Program
 
         var destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ComputerInfo");
         var formattedText = ComputerSpecSerializer.Serialize(computerSpecs, destinationPath);
-        
+
         await File.WriteAllTextAsync(destinationPath, formattedText).ConfigureAwait(false);
 
-        Console.WriteLine($"Saved computer specs to {formattedText}.");
+        Console.WriteLine($"Saved computer specs to {destinationPath}.txt");
         Console.WriteLine("Press a key to exit.");
         Console.ReadKey();
     }
 
 
 
-    private static Dictionary<ComponentProperty, string> ReadComponentProperties(ComponentType componentType, ManagementBaseObject managementObject) => componentType
-        .GetPropertyNames()
-        .Aggregate(new Dictionary<ComponentProperty, string>(), (properties, propertyName) =>
-        {
-            if (TryGetValue(propertyName, managementObject, out var propertyValue) && !string.IsNullOrWhiteSpace(propertyValue))
-                properties.Add(propertyName, propertyValue);
+    private static ComputerSpecs GetComputerSpecs() => new()
+    {
+        Cpu = GetComponentOfType(ComponentType.Cpu)
+              ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Cpu)}"),
+        Gpu = GetMultipleComponentsOfType(ComponentType.Gpu),
+        Motherboard = GetComponentOfType(ComponentType.Motherboard)
+                      ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Motherboard)}"),
+        Storage = GetMultipleComponentsOfType(ComponentType.Storage),
+        Memory = GetMultipleComponentsOfType(ComponentType.Memory),
+        Optical = GetMultipleComponentsOfType(ComponentType.Optical),
+        Network = GetMultipleComponentsOfType(ComponentType.Network)
+            .Where(component => component.Properties[ComponentProperty.PhysicalAdapter] == "True"),
+        Sound = GetMultipleComponentsOfType(ComponentType.Sound),
+        Keyboard = GetMultipleComponentsOfType(ComponentType.Keyboard),
+        Mouse = GetMultipleComponentsOfType(ComponentType.Mouse),
+    };
 
-            return properties;
-        });
+
+
+    private static Dictionary<ComponentProperty, string> ReadComponentProperties(
+        ComponentType componentType,
+        ManagementBaseObject managementObject)
+    {
+        Console.WriteLine($"Reading component properties of {componentType}.");
+
+        return componentType
+            .GetPropertyNames()
+            .Aggregate(new Dictionary<ComponentProperty, string>(), (properties, propertyName) =>
+            {
+                if (TryGetValue(propertyName, managementObject, out var propertyValue) && !string.IsNullOrWhiteSpace(propertyValue))
+                    properties.Add(propertyName, propertyValue);
+
+                return properties;
+            });
+    }
 
 
 
@@ -75,26 +97,10 @@ internal static class Program
 
 
 
-    private static ComputerSpecs GetComputerSpecs() => new()
-    {
-        Cpu = GetComponentOfType(ComponentType.Cpu)
-              ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Cpu)}"),
-        Gpu = GetMultipleComponentsOfType(ComponentType.Gpu),
-        Motherboard = GetComponentOfType(ComponentType.Motherboard)
-                      ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Motherboard)}"),
-        Storage = GetMultipleComponentsOfType(ComponentType.Storage),
-        Memory = GetMultipleComponentsOfType(ComponentType.Memory),
-        Optical = GetMultipleComponentsOfType(ComponentType.Optical),
-        Network = GetMultipleComponentsOfType(ComponentType.Network)
-            .Where(component => component.Properties[ComponentProperty.PhysicalAdapter] == "True"),
-        Sound = GetMultipleComponentsOfType(ComponentType.Sound),
-        Keyboard = GetMultipleComponentsOfType(ComponentType.Keyboard),
-        Mouse = GetMultipleComponentsOfType(ComponentType.Mouse),
-    };
-
-
-
-    private static bool TryGetValue(ComponentProperty key, ManagementBaseObject managementBaseObject, [NotNullWhen(true)] out string? value)
+    private static bool TryGetValue(
+        ComponentProperty key,
+        ManagementBaseObject managementBaseObject,
+        [NotNullWhen(true)] out string? value)
     {
         try
         {
