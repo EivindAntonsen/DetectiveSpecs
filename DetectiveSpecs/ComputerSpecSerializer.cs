@@ -6,7 +6,7 @@ namespace DetectiveSpecs;
 public class ComputerSpecSerializer
 {
     private readonly StringBuilder stringBuilder = new();
-    private readonly int padLength = GetPadLength();
+    public readonly int PadLength = GetPadLength();
 
 
 
@@ -45,7 +45,7 @@ public class ComputerSpecSerializer
         stringBuilder.AppendLine(componentType.ToString());
 
         foreach (var (key, value) in component.Properties)
-            stringBuilder.AppendLine($"  {key.ToString().PadRight(padLength)}  {value}");
+            stringBuilder.AppendLine($"  {key.ToString().PadRight(PadLength)}  {value}");
     }
 
 
@@ -63,7 +63,7 @@ public class ComputerSpecSerializer
             stringBuilder.AppendLine($"{componentType}" + (array.Length > 1 ? $"-{index}" : ""));
             index++;
             foreach (var (key, value) in component.Properties)
-                stringBuilder.AppendLine($"  {key.ToString().PadRight(padLength)}  {value}");
+                stringBuilder.AppendLine($"  {key.ToString().PadRight(PadLength)}  {value}");
         }
     }
 }
