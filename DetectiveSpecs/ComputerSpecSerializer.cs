@@ -12,17 +12,9 @@ public class ComputerSpecSerializer
 
     public string Serialize(ComputerSpecs specs)
     {
-        AppendSingleComponent(specs.Motherboard);
-        AppendSingleComponent(specs.Cpu);
-        AppendManyComponents(specs.Gpu);
-        AppendManyComponents(specs.Memory);
-        AppendManyComponents(specs.Storage);
-        AppendManyComponents(specs.Network);
-        AppendManyComponents(specs.Optical);
-        AppendManyComponents(specs.Mouse);
-        AppendManyComponents(specs.Keyboard);
-        AppendManyComponents(specs.Sound);
-
+        foreach (Component component in specs.GetAllComponents) 
+            AppendComponent(component);
+        
         return stringBuilder.ToString();
     }
 
@@ -40,7 +32,7 @@ public class ComputerSpecSerializer
 
 
 
-    private void AppendSingleComponent(Component component)
+    private void AppendComponent(Component component)
     {
         stringBuilder.AppendLine(component.ComponentType.ToString());
 
@@ -50,7 +42,7 @@ public class ComputerSpecSerializer
 
 
 
-    private void AppendManyComponents(IEnumerable<Component> components)
+    private void AppendComponent(IEnumerable<Component> components)
     {
         var array = components.ToArray();
 

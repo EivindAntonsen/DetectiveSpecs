@@ -12,4 +12,14 @@ public record ComputerSpecs
     public required IEnumerable<Component> Sound { init; get; }
     public required IEnumerable<Component> Keyboard { init; get; }
     public required IEnumerable<Component> Mouse { init; get; }
+
+    public IEnumerable<Component> GetAllComponents =>
+        new List<Component> { Motherboard, Cpu }
+            .Concat(Gpu)
+            .Concat(Storage)
+            .Concat(Memory)
+            .Concat(Optical)
+            .Concat(Sound)
+            .Concat(Keyboard)
+            .Concat(Mouse);
 };
