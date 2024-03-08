@@ -1,4 +1,4 @@
-﻿param(
+param(
     [String]$accessToken,
     [String]$workspace,
     [String]$releaseId,

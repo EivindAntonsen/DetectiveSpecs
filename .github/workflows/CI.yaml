@@ -23,24 +23,13 @@ jobs:
         shell: pwsh
 
       - name: Check version
+        id: Check Version
+        continue-on-error: true
         run: |
-          $uri = "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${env:VERSION}"
-          try {
-              $response = Invoke-RestMethod -Method Get -Headers @{ Authorization = "Bearer $env:ACCESS_TOKEN" } -Uri $uri
-              Write-Output "Version already exists"
-              Add-Content -Path $env:GITHUB_ENV -Value "RELEASE_ID=$($response.id)"
-              exit 1
-          }
-          catch {
-              if ($_.Exception.Response.StatusCode -eq 404) {
-                Write-Output "Version does not exist, safe to continue"
-              }
-              else {
-                throw
-              }
-          }
+          pwsh ./.github/scripts/CheckVersion.ps1 -githubRepository ${{ github.repository }} -version $env:VERSION -accessToken $env:ACCESS_TOKEN
         shell: pwsh
         env:
+          VERSION: ${{ env.VERSION }}
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Setup .NET 8.0
@@ -94,4 +83,4 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           VERSION: ${{ env.VERSION }}
           RELEASE_ID: ${{ env.RELEASE_ID }}
-        run : pwsh ./.github/scripts/UploadRelease2.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -releaseId $env:RELEASE_ID -version $env:VERSION
+        run : pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -releaseId $env:RELEASE_ID -version $env:VERSION
