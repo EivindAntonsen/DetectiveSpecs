@@ -1,7 +1,7 @@
-﻿using static DetectiveSpecs.Models.ComponentType;
-using static DetectiveSpecs.Models.ComponentProperty;
+﻿using static DetectiveSpecs.Enums.ComponentType;
+using static DetectiveSpecs.Enums.ComponentProperty;
 
-namespace DetectiveSpecs.Models;
+namespace DetectiveSpecs.Enums;
 
 public enum ComponentType
 {

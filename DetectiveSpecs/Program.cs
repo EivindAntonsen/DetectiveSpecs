@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Management;
-using DetectiveSpecs.Models;
+using DetectiveSpecs.Enums;
 
 
 namespace DetectiveSpecs;
@@ -12,13 +12,13 @@ internal static class Program
         Console.WriteLine("Starting work on detecting components");
 
         var computerSpecs = GetComputerSpecs();
+        var serializedText = new ComputerSpecSerializer().Serialize(computerSpecs);
+        var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        var path = Path.Combine(currentDirectory, "ComputerInfo");
+        
+        await File.WriteAllTextAsync(path, serializedText).ConfigureAwait(false);
 
-        var destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ComputerInfo");
-        var formattedText = ComputerSpecSerializer.Serialize(computerSpecs, destinationPath);
-
-        await File.WriteAllTextAsync(destinationPath, formattedText).ConfigureAwait(false);
-
-        Console.WriteLine($"Saved computer specs to {destinationPath}.txt");
+        Console.WriteLine($"Saved computer specs to {path}.txt");
         Console.WriteLine("Press a key to exit.");
         Console.ReadKey();
     }

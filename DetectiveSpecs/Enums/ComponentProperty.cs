@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace DetectiveSpecs.Models;
+
+namespace DetectiveSpecs.Enums;
 
 public enum ComponentProperty
 {
@@ -12,7 +13,6 @@ public enum ComponentProperty
     Type,
     Partitions,
     Size,
-    ManufacturerModel,
     PartNumber,
     Capacity,
     Speed,

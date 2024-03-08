@@ -1,4 +1,4 @@
-﻿using DetectiveSpecs.Models;
+﻿using DetectiveSpecs.Enums;
 
 namespace DetectiveSpecs;
 

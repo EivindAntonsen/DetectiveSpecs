@@ -1,46 +1,56 @@
 ﻿using System.Text;
-using DetectiveSpecs.Models;
+using DetectiveSpecs.Enums;
 
 namespace DetectiveSpecs;
 
-
-public static class ComputerSpecSerializer
+public class ComputerSpecSerializer
 {
-    public static string Serialize(ComputerSpecs specs, string path)
-    {
-        var stringBuilder = new StringBuilder();
-        var padToLength = Enum
-            .GetValues<ComponentProperty>()
-            .Select(componentProperty => componentProperty.ToString())
-            .Max(s => s.Length);
+    private readonly StringBuilder stringBuilder = new();
+    private readonly int padLength = GetPadLength();
 
-        AppendSingleComponent(ComponentType.Motherboard, specs.Motherboard, stringBuilder, padToLength);
-        AppendSingleComponent(ComponentType.Cpu, specs.Cpu, stringBuilder, padToLength);
-        AppendManyComponents(ComponentType.Gpu, specs.Gpu, stringBuilder, padToLength);
-        AppendManyComponents(ComponentType.Memory, specs.Memory, stringBuilder, padToLength);
-        AppendManyComponents(ComponentType.Storage, specs.Storage, stringBuilder, padToLength);
-        AppendManyComponents(ComponentType.Network, specs.Network, stringBuilder, padToLength);
-        AppendManyComponents(ComponentType.Optical, specs.Optical, stringBuilder, padToLength);
-        AppendManyComponents(ComponentType.Mouse, specs.Mouse, stringBuilder, padToLength);
-        AppendManyComponents(ComponentType.Keyboard, specs.Keyboard, stringBuilder, padToLength);
-        AppendManyComponents(ComponentType.Sound, specs.Sound, stringBuilder, padToLength);
+
+
+    public string Serialize(ComputerSpecs specs)
+    {
+        AppendSingleComponent(ComponentType.Motherboard, specs.Motherboard);
+        AppendSingleComponent(ComponentType.Cpu, specs.Cpu);
+        AppendManyComponents(ComponentType.Gpu, specs.Gpu);
+        AppendManyComponents(ComponentType.Memory, specs.Memory);
+        AppendManyComponents(ComponentType.Storage, specs.Storage);
+        AppendManyComponents(ComponentType.Network, specs.Network);
+        AppendManyComponents(ComponentType.Optical, specs.Optical);
+        AppendManyComponents(ComponentType.Mouse, specs.Mouse);
+        AppendManyComponents(ComponentType.Keyboard, specs.Keyboard);
+        AppendManyComponents(ComponentType.Sound, specs.Sound);
 
         return stringBuilder.ToString();
     }
 
 
 
-    private static void AppendSingleComponent(ComponentType componentType, Component component, StringBuilder sb, int pad)
+    /// <summary>
+    /// To ensure a visually sensible output, we append a minimum length to the keys
+    /// so that the values will line up as if on a column.
+    /// </summary>
+    /// <returns></returns>
+    private static int GetPadLength() => Enum
+        .GetValues<ComponentProperty>()
+        .Select(componentProperty => componentProperty.ToString())
+        .Max(s => s.Length);
+
+
+
+    private void AppendSingleComponent(ComponentType componentType, Component component)
     {
-        sb.AppendLine(componentType.ToString());
+        stringBuilder.AppendLine(componentType.ToString());
 
         foreach (var (key, value) in component.Properties)
-            sb.AppendLine($"  {key.ToString().PadRight(pad)}  {value}");
+            stringBuilder.AppendLine($"  {key.ToString().PadRight(padLength)}  {value}");
     }
 
 
 
-    private static void AppendManyComponents(ComponentType componentType, IEnumerable<Component> components, StringBuilder sb, int pad)
+    private void AppendManyComponents(ComponentType componentType, IEnumerable<Component> components)
     {
         var array = components.ToArray();
 
@@ -50,10 +60,10 @@ public static class ComputerSpecSerializer
         var index = 1;
         foreach (var component in array)
         {
-            sb.AppendLine($"{componentType}" + (array.Length > 1 ? $"-{index}" : ""));
+            stringBuilder.AppendLine($"{componentType}" + (array.Length > 1 ? $"-{index}" : ""));
             index++;
             foreach (var (key, value) in component.Properties)
-                sb.AppendLine($"  {key.ToString().PadRight(pad)}  {value}");
+                stringBuilder.AppendLine($"  {key.ToString().PadRight(padLength)}  {value}");
         }
     }
 }
