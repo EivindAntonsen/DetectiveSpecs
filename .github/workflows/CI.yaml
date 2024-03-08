@@ -23,7 +23,7 @@ jobs:
         shell: pwsh
 
       - name: Check version
-        id: Check Version
+        id: checkversion
         continue-on-error: true
         run: |
           pwsh ./.github/scripts/CheckVersion.ps1 -githubRepository ${{ github.repository }} -version $env:VERSION -accessToken $env:ACCESS_TOKEN
