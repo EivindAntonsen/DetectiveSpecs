@@ -2,4 +2,4 @@
 
 namespace DetectiveSpecs;
 
-public record Component(Dictionary<ComponentProperty, string> Properties);
+public record Component(ComponentType ComponentType, Dictionary<ComponentProperty, string> Properties);

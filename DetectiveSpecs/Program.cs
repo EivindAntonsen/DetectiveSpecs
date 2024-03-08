@@ -72,7 +72,7 @@ internal static class Program
         {
             var properties = ReadComponentProperties(componentType, managementBaseObject);
 
-            yield return new Component(properties);
+            yield return new Component(componentType, properties);
         }
     }
 
@@ -92,7 +92,7 @@ internal static class Program
 
         var properties = ReadComponentProperties(componentType, searchResult);
 
-        return new Component(properties);
+        return new Component(componentType, properties);
     }
 
 

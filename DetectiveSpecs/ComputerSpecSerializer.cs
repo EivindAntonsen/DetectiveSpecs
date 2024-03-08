@@ -12,16 +12,16 @@ public class ComputerSpecSerializer
 
     public string Serialize(ComputerSpecs specs)
     {
-        AppendSingleComponent(ComponentType.Motherboard, specs.Motherboard);
-        AppendSingleComponent(ComponentType.Cpu, specs.Cpu);
-        AppendManyComponents(ComponentType.Gpu, specs.Gpu);
-        AppendManyComponents(ComponentType.Memory, specs.Memory);
-        AppendManyComponents(ComponentType.Storage, specs.Storage);
-        AppendManyComponents(ComponentType.Network, specs.Network);
-        AppendManyComponents(ComponentType.Optical, specs.Optical);
-        AppendManyComponents(ComponentType.Mouse, specs.Mouse);
-        AppendManyComponents(ComponentType.Keyboard, specs.Keyboard);
-        AppendManyComponents(ComponentType.Sound, specs.Sound);
+        AppendSingleComponent(specs.Motherboard);
+        AppendSingleComponent(specs.Cpu);
+        AppendManyComponents(specs.Gpu);
+        AppendManyComponents(specs.Memory);
+        AppendManyComponents(specs.Storage);
+        AppendManyComponents(specs.Network);
+        AppendManyComponents(specs.Optical);
+        AppendManyComponents(specs.Mouse);
+        AppendManyComponents(specs.Keyboard);
+        AppendManyComponents(specs.Sound);
 
         return stringBuilder.ToString();
     }
@@ -40,9 +40,9 @@ public class ComputerSpecSerializer
 
 
 
-    private void AppendSingleComponent(ComponentType componentType, Component component)
+    private void AppendSingleComponent(Component component)
     {
-        stringBuilder.AppendLine(componentType.ToString());
+        stringBuilder.AppendLine(component.ComponentType.ToString());
 
         foreach (var (key, value) in component.Properties)
             stringBuilder.AppendLine($"  {key.ToString().PadRight(PadLength)}  {value}");
@@ -50,7 +50,7 @@ public class ComputerSpecSerializer
 
 
 
-    private void AppendManyComponents(ComponentType componentType, IEnumerable<Component> components)
+    private void AppendManyComponents(IEnumerable<Component> components)
     {
         var array = components.ToArray();
 
@@ -60,7 +60,7 @@ public class ComputerSpecSerializer
         var index = 1;
         foreach (var component in array)
         {
-            stringBuilder.AppendLine($"{componentType}" + (array.Length > 1 ? $"-{index}" : ""));
+            stringBuilder.AppendLine($"{component.ComponentType}" + (array.Length > 1 ? $"-{index}" : ""));
             index++;
             foreach (var (key, value) in component.Properties)
                 stringBuilder.AppendLine($"  {key.ToString().PadRight(PadLength)}  {value}");
