@@ -57,14 +57,7 @@ jobs:
         run: dotnet test --no-build --verbosity normal
 
       - name: Publish
-        run: |
-          $project = 'DetectiveSpecs/DetectiveSpecs.csproj'
-          $filename = "DetectiveSpecs-v${env:VERSION}.exe"
-          $output = "${{ runner.workspace }}\Staging\Build\$filename"
-          
-          dotnet publish $project -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true --output $output
-          
-          Get-ChildItem "${{ runner.workspace }}\Staging\Build\"
+        run: pwsh ./.github/scripts/Publish.ps1 -project "DetectiveSpecs/DetectiveSpecs.csproj" -version $env:VERSION -workspacePath ${{ runner.workspace }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
