@@ -14,7 +14,7 @@ internal static class Program
         var computerSpecs = GetComputerSpecs();
         var serializedText = new ComputerSpecSerializer().Serialize(computerSpecs);
         var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        var path = Path.Combine(currentDirectory, "ComputerInfo");
+        var path = Path.Combine(currentDirectory, "ComputerInfo.txt");
         
         await File.WriteAllTextAsync(path, serializedText).ConfigureAwait(false);
 

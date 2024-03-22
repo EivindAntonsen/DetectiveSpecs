@@ -39,23 +39,4 @@ public class ComputerSpecSerializer
         foreach (var (key, value) in component.Properties)
             stringBuilder.AppendLine($"  {key.ToString().PadRight(PadLength)}  {value}");
     }
-
-
-
-    private void AppendComponent(IEnumerable<Component> components)
-    {
-        var array = components.ToArray();
-
-        if (array.Length == 0)
-            return;
-
-        var index = 1;
-        foreach (var component in array)
-        {
-            stringBuilder.AppendLine($"{component.ComponentType}" + (array.Length > 1 ? $"-{index}" : ""));
-            index++;
-            foreach (var (key, value) in component.Properties)
-                stringBuilder.AppendLine($"  {key.ToString().PadRight(PadLength)}  {value}");
-        }
-    }
 }
