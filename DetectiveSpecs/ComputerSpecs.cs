@@ -18,6 +18,7 @@ public record ComputerSpecs
             .Concat(Gpu)
             .Concat(Storage)
             .Concat(Memory)
+            .Concat(Network)
             .Concat(Optical)
             .Concat(Sound)
             .Concat(Keyboard)
