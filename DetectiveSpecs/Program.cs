@@ -26,16 +26,14 @@ internal static class Program
 
     private static ComputerSpecs GetComputerSpecs()
     {
-        var cpu = GetComponentOfType(ComponentType.Cpu)
-                  ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Cpu)}");
+        var cpu = GetComponentOfType(ComponentType.Cpu);
         var gpu = GetMultipleComponentsOfType(ComponentType.Gpu);
-        var motherBoard = GetComponentOfType(ComponentType.Motherboard)
-                          ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Motherboard)}");
+        var motherBoard = GetComponentOfType(ComponentType.Motherboard);
         var storage = GetMultipleComponentsOfType(ComponentType.Storage);
         var memory = GetMultipleComponentsOfType(ComponentType.Memory);
         var optical = GetMultipleComponentsOfType(ComponentType.Optical);
         var network = GetMultipleComponentsOfType(ComponentType.Network)
-            .Where(component => (string) component.Properties[ComponentProperty.PhysicalAdapter] == "True");
+            .Where(component => component.Properties[ComponentProperty.PhysicalAdapter] == "True");
         var sound = GetMultipleComponentsOfType(ComponentType.Sound);
         var keyboard = GetMultipleComponentsOfType(ComponentType.Keyboard);
         var mouse = GetMultipleComponentsOfType(ComponentType.Mouse);
@@ -57,7 +55,7 @@ internal static class Program
 
 
 
-    private static Dictionary<ComponentProperty, object> ReadComponentProperties(
+    private static Dictionary<ComponentProperty, string> ReadComponentProperties(
         ComponentType componentType,
         ManagementBaseObject managementObject)
     {
@@ -65,15 +63,12 @@ internal static class Program
 
         return componentType
             .GetPropertyNames()
-            .Aggregate(new Dictionary<ComponentProperty, object>(), (properties, key) =>
+            .Aggregate(new Dictionary<ComponentProperty, string>(), (properties, key) =>
             {
                 if (!TryGetValue(key, managementObject, out var value) || string.IsNullOrWhiteSpace(value))
                     return properties;
 
-                object? formattedValue = PropertyValueFormatter.Format(componentType, key, value);
-
-                if (formattedValue is null)
-                    return properties;
+                string formattedValue = ComponentPropertyValueFormatter.Format(componentType, key, value);
 
                 properties.Add(key, formattedValue);
 

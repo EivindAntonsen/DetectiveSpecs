@@ -2,9 +2,9 @@
 
 public record ComputerSpecs
 {
-    public required Component Motherboard { init; get; }
+    public required Component? Motherboard { init; get; }
     public required IEnumerable<Component> Gpu { init; get; }
-    public required Component Cpu { init; get; }
+    public required Component? Cpu { init; get; }
     public required IEnumerable<Component> Storage { init; get; }
     public required IEnumerable<Component> Memory { init; get; }
     public required IEnumerable<Component> Optical { init; get; }
@@ -14,7 +14,8 @@ public record ComputerSpecs
     public required IEnumerable<Component> Mouse { init; get; }
 
     public IEnumerable<Component> GetAllComponents =>
-        new List<Component> { Motherboard, Cpu }
+        new List<Component?> { Motherboard, Cpu }
+            .OfType<Component>()
             .Concat(Gpu)
             .Concat(Storage)
             .Concat(Memory)

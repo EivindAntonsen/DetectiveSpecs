@@ -30,7 +30,7 @@ public static class TestData
 
 
 
-    private static Dictionary<ComponentProperty, object> GetComponentProperties(ComponentType type) => type
+    private static Dictionary<ComponentProperty, string> GetComponentProperties(ComponentType type) => type
         .GetPropertyNames()
-        .ToDictionary(propertyName => propertyName, propertyName => propertyName.ToString() as object);
+        .ToDictionary(propertyName => propertyName, propertyName => propertyName.ToString());
 }
