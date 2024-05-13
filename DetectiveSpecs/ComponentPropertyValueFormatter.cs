@@ -18,7 +18,8 @@ public static class ComponentPropertyValueFormatter
             clockSpeedHertz / 1000 + " Ghz",
         ComponentType.Gpu when componentProperty is ComponentProperty.AdapterRAM && long.TryParse(propertyValue.ToString(), out var adapterRamBytes) =>
             Math.Round(Convert.ToDouble(adapterRamBytes) / 1024 / 1024 / 1024) + " GB",
-        ComponentType.Gpu when componentProperty is ComponentProperty.MinRefreshRate or ComponentProperty.MaxRefreshRate =>
+        ComponentType.Gpu when componentProperty is ComponentProperty.MinRefreshRate or ComponentProperty.MaxRefreshRate &&
+                               !propertyValue.ToString()?.Contains(" Hz") == false =>
             propertyValue + " Hz",
         ComponentType.Gpu when componentProperty is ComponentProperty.VideoModeDescription =>
             GetFormattedVideoMode(propertyValue.ToString()!),
