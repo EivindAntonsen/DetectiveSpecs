@@ -70,7 +70,10 @@ internal static class Program
                 if (!TryGetValue(key, managementObject, out var value) || string.IsNullOrWhiteSpace(value))
                     return properties;
 
-                object formattedValue = PropertyValueFormatter.Format(componentType, key, value);
+                object? formattedValue = PropertyValueFormatter.Format(componentType, key, value);
+
+                if (formattedValue is null)
+                    return properties;
 
                 properties.Add(key, formattedValue);
 
