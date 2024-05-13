@@ -37,9 +37,6 @@ public class ComputerSpecSerializer
         _stringBuilder.AppendLine(component.ComponentType.ToString());
 
         foreach (var (key, value) in component.Properties)
-        {
-            string? formattedValue = ComponentPropertyValueFormatter.Format(component.ComponentType, key, value);
-            _stringBuilder.AppendLine($"  {key.ToString().PadRight(PadLength)}  {formattedValue}");
-        }
+            _stringBuilder.AppendLine($"  {key.ToString().PadRight(PadLength)}  {value}");
     }
 }
