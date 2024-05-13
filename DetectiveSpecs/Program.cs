@@ -2,7 +2,6 @@
 using System.Management;
 using DetectiveSpecs.Enums;
 
-
 namespace DetectiveSpecs;
 
 internal static class Program
@@ -15,7 +14,7 @@ internal static class Program
         var serializedText = new ComputerSpecSerializer().Serialize(computerSpecs);
         var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
         var path = Path.Combine(currentDirectory, "ComputerInfo.txt");
-        
+
         await File.WriteAllTextAsync(path, serializedText).ConfigureAwait(false);
 
         Console.WriteLine($"Saved computer specs to {path}.txt");
@@ -25,26 +24,40 @@ internal static class Program
 
 
 
-    private static ComputerSpecs GetComputerSpecs() => new()
+    private static ComputerSpecs GetComputerSpecs()
     {
-        Cpu = GetComponentOfType(ComponentType.Cpu)
-              ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Cpu)}"),
-        Gpu = GetMultipleComponentsOfType(ComponentType.Gpu),
-        Motherboard = GetComponentOfType(ComponentType.Motherboard)
-                      ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Motherboard)}"),
-        Storage = GetMultipleComponentsOfType(ComponentType.Storage),
-        Memory = GetMultipleComponentsOfType(ComponentType.Memory),
-        Optical = GetMultipleComponentsOfType(ComponentType.Optical),
-        Network = GetMultipleComponentsOfType(ComponentType.Network)
-            .Where(component => component.Properties[ComponentProperty.PhysicalAdapter] == "True"),
-        Sound = GetMultipleComponentsOfType(ComponentType.Sound),
-        Keyboard = GetMultipleComponentsOfType(ComponentType.Keyboard),
-        Mouse = GetMultipleComponentsOfType(ComponentType.Mouse),
-    };
+        var cpu = GetComponentOfType(ComponentType.Cpu)
+                  ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Cpu)}");
+        var gpu = GetMultipleComponentsOfType(ComponentType.Gpu);
+        var motherBoard = GetComponentOfType(ComponentType.Motherboard)
+                          ?? throw new ApplicationException($"Unable to find information about the {nameof(ComponentType.Motherboard)}");
+        var storage = GetMultipleComponentsOfType(ComponentType.Storage);
+        var memory = GetMultipleComponentsOfType(ComponentType.Memory);
+        var optical = GetMultipleComponentsOfType(ComponentType.Optical);
+        var network = GetMultipleComponentsOfType(ComponentType.Network)
+            .Where(component => (string) component.Properties[ComponentProperty.PhysicalAdapter] == "True");
+        var sound = GetMultipleComponentsOfType(ComponentType.Sound);
+        var keyboard = GetMultipleComponentsOfType(ComponentType.Keyboard);
+        var mouse = GetMultipleComponentsOfType(ComponentType.Mouse);
+
+        return new ComputerSpecs
+        {
+            Cpu = cpu,
+            Gpu = gpu,
+            Motherboard = motherBoard,
+            Storage = storage,
+            Memory = memory,
+            Optical = optical,
+            Network = network,
+            Sound = sound,
+            Keyboard = keyboard,
+            Mouse = mouse
+        };
+    }
 
 
 
-    private static Dictionary<ComponentProperty, string> ReadComponentProperties(
+    private static Dictionary<ComponentProperty, object> ReadComponentProperties(
         ComponentType componentType,
         ManagementBaseObject managementObject)
     {
@@ -52,10 +65,14 @@ internal static class Program
 
         return componentType
             .GetPropertyNames()
-            .Aggregate(new Dictionary<ComponentProperty, string>(), (properties, propertyName) =>
+            .Aggregate(new Dictionary<ComponentProperty, object>(), (properties, key) =>
             {
-                if (TryGetValue(propertyName, managementObject, out var propertyValue) && !string.IsNullOrWhiteSpace(propertyValue))
-                    properties.Add(propertyName, propertyValue);
+                if (!TryGetValue(key, managementObject, out var value) || string.IsNullOrWhiteSpace(value))
+                    return properties;
+
+                object formattedValue = PropertyValueFormatter.Format(componentType, key, value);
+
+                properties.Add(key, formattedValue);
 
                 return properties;
             });
