@@ -17,7 +17,7 @@ internal static class Program
 
         await File.WriteAllTextAsync(path, serializedText).ConfigureAwait(false);
 
-        Console.WriteLine($"Saved computer specs to {path}.txt");
+        Console.WriteLine($"Saved computer specs to {path}");
         Console.WriteLine("Press a key to exit.");
         Console.ReadKey();
     }
