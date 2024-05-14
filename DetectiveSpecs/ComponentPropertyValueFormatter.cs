@@ -1,35 +1,40 @@
 ﻿using System.Text.RegularExpressions;
 using DetectiveSpecs.Enums;
+using static DetectiveSpecs.Enums.ComponentProperty;
+using static DetectiveSpecs.Enums.ComponentType;
 
 namespace DetectiveSpecs;
 
 public static class ComponentPropertyValueFormatter
 {
+    private static double BytesToGigaBytes(long bytes) => Convert.ToDouble(bytes) / 1024 / 1024 / 1024;
+
+
+
     /// <summary>
     /// Formats a property value based on the component type and property.
     /// </summary>
     /// <param name="componentType">The type of the component.</param>
-    /// <param name="componentProperty">The property of the component.</param>
-    /// <param name="propertyValue">The value of the property.</param>
+    /// <param name="key">The property of the component.</param>
+    /// <param name="value">The value of the property.</param>
     /// <returns>The formatted property value as a string.</returns>
-    public static string Format(ComponentType componentType, ComponentProperty componentProperty, object propertyValue) => componentType switch
+    public static string Format(ComponentType componentType, ComponentProperty key, object value) => componentType switch
     {
-        ComponentType.Cpu when componentProperty is ComponentProperty.MaxClockSpeed && long.TryParse(propertyValue.ToString(), out var clockSpeedHertz) =>
+        Cpu when key is MaxClockSpeed && long.TryParse(value.ToString(), out var clockSpeedHertz) =>
             clockSpeedHertz / 1000 + " Ghz",
-        ComponentType.Gpu when componentProperty is ComponentProperty.AdapterRAM && long.TryParse(propertyValue.ToString(), out var adapterRamBytes) =>
-            Math.Round(Convert.ToDouble(adapterRamBytes) / 1024 / 1024 / 1024) + " GB",
-        ComponentType.Gpu when componentProperty is ComponentProperty.MinRefreshRate or ComponentProperty.MaxRefreshRate &&
-                               !propertyValue.ToString()?.Contains(" Hz") is null or false =>
-            propertyValue + " Hz",
-        ComponentType.Gpu when componentProperty is ComponentProperty.VideoModeDescription =>
-            GetFormattedVideoMode(propertyValue.ToString()!),
-        ComponentType.Storage when componentProperty is ComponentProperty.Size && long.TryParse(propertyValue.ToString(), out var storageBytes) =>
-            Math.Round(Convert.ToDouble(storageBytes) / 1024 / 1024 / 1024) + " GB",
-        ComponentType.Memory when componentProperty is ComponentProperty.Capacity && long.TryParse(propertyValue.ToString(), out var capacityBytes) =>
-            Math.Round(Convert.ToDouble(capacityBytes) / 1024 / 1024 / 1024) + " GB",
-        ComponentType.Memory when componentProperty is ComponentProperty.Speed && long.TryParse(propertyValue.ToString(), out var memorySpeedHertz) =>
+        Gpu when key is AdapterRAM && long.TryParse(value.ToString(), out var adapterRamBytes) =>
+            Math.Round(BytesToGigaBytes(adapterRamBytes)) + " GB",
+        Gpu when key is MinRefreshRate or MaxRefreshRate && !value.ToString()?.Contains(" Hz") is null or false =>
+            value + " Hz",
+        Gpu when key is VideoModeDescription =>
+            GetFormattedVideoMode(value.ToString()!),
+        Storage when key is Size && long.TryParse(value.ToString(), out var storageBytes) =>
+            Math.Round(BytesToGigaBytes(storageBytes)) + " GB",
+        Memory when key is Capacity && long.TryParse(value.ToString(), out var capacityBytes) =>
+            Math.Round(BytesToGigaBytes(capacityBytes)) + " GB",
+        Memory when key is Speed && long.TryParse(value.ToString(), out var memorySpeedHertz) =>
             memorySpeedHertz / 1000 + " Ghz",
-        _ => propertyValue.ToString() ?? string.Empty
+        _ => value.ToString() ?? string.Empty
     };
 
 
