@@ -5,12 +5,8 @@ using static DetectiveSpecs.Enums.ComponentType;
 
 namespace DetectiveSpecs;
 
-public static class ComponentPropertyValueFormatter
+public static partial class ComponentPropertyValueFormatter
 {
-    private static double BytesToGigaBytes(long bytes) => Convert.ToDouble(bytes) / 1024 / 1024 / 1024;
-
-
-
     /// <summary>
     /// Formats a property value based on the component type and property.
     /// </summary>
@@ -41,13 +37,15 @@ public static class ComponentPropertyValueFormatter
 
     private static string GetFormattedAmount(long l) => l > 1_000_000_000 ? l / 1_000_000_000 + "b " : l / 1_000_000 + "m ";
 
+    private static double BytesToGigaBytes(long bytes) => Convert.ToDouble(bytes) / 1024 / 1024 / 1024;
+
 
 
     private static string GetFormattedVideoMode(string videoMode)
     {
-        var regex = new Regex(@"\d+\s+(?=colors$)");
+        var regex = ColorAmountRegex();
 
-        Match match = regex.Match(videoMode);
+        var match = regex.Match(videoMode);
         if (!long.TryParse(match.Value, out var longValue))
             return string.Empty;
 
@@ -56,4 +54,7 @@ public static class ComponentPropertyValueFormatter
 
         return regex.Replace(videoMode, formattedAmount);
     }
+
+    [GeneratedRegex(@"\d+\s+(?=colors$)")]
+    private static partial Regex ColorAmountRegex();
 }

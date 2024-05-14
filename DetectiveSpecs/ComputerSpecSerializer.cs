@@ -12,7 +12,7 @@ public class ComputerSpecSerializer
 
     public string Serialize(ComputerSpecs specs)
     {
-        foreach (Component component in specs.GetAllComponents)
+        foreach (var component in specs.GetAllComponents)
             AppendComponent(component);
 
         return _stringBuilder.ToString();

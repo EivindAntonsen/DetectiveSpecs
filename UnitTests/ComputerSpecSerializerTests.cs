@@ -9,10 +9,10 @@ public class ComputerSpecSerializerTests
     [TestMethod]
     public void Serialization_Returns_NotNull()
     {
-        ComputerSpecs computerSpecs = TestData.CreateComputerSpecs();
+        var computerSpecs = TestData.CreateComputerSpecs();
 
         var computerSpecSerializer = new ComputerSpecSerializer();
-        string serializedSpecs = computerSpecSerializer.Serialize(computerSpecs);
+        var serializedSpecs = computerSpecSerializer.Serialize(computerSpecs);
         
         Assert.IsNotNull(serializedSpecs);
     }
@@ -22,12 +22,12 @@ public class ComputerSpecSerializerTests
     [TestMethod]
     public void SerializedData_IsProperlyPadded()
     {
-        ComputerSpecs computerSpecs = TestData.CreateComputerSpecs();
+        var computerSpecs = TestData.CreateComputerSpecs();
         var computerSpecSerializer = new ComputerSpecSerializer();
-        string serializedSpecs = computerSpecSerializer.Serialize(computerSpecs);
+        var serializedSpecs = computerSpecSerializer.Serialize(computerSpecs);
         string[] lines = serializedSpecs.Split(Environment.NewLine);
         
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             IEnumerable<string> enumStrings = Enum
                 .GetValues<ComponentProperty>()

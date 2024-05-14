@@ -68,7 +68,7 @@ internal static class Program
                 if (!TryGetValue(key, managementObject, out var value) || string.IsNullOrWhiteSpace(value))
                     return properties;
 
-                string formattedValue = ComponentPropertyValueFormatter.Format(componentType, key, value);
+                var formattedValue = ComponentPropertyValueFormatter.Format(componentType, key, value);
 
                 properties.Add(key, formattedValue);
 
