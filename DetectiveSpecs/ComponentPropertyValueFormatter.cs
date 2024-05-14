@@ -14,23 +14,23 @@ public static partial class ComponentPropertyValueFormatter
     /// <param name="key">The property of the component.</param>
     /// <param name="value">The value of the property.</param>
     /// <returns>The formatted property value as a string.</returns>
-    public static string Format(ComponentType componentType, ComponentProperty key, object value) => componentType switch
+    public static string Format(ComponentType componentType, ComponentProperty key, string value) => componentType switch
     {
-        Cpu when key is MaxClockSpeed && long.TryParse(value.ToString(), out var clockSpeedHertz) =>
+        Cpu when key is MaxClockSpeed && long.TryParse(value, out var clockSpeedHertz) =>
             clockSpeedHertz / 1000 + " Ghz",
-        Gpu when key is AdapterRAM && long.TryParse(value.ToString(), out var adapterRamBytes) =>
+        Gpu when key is AdapterRAM && long.TryParse(value, out var adapterRamBytes) =>
             Math.Round(BytesToGigaBytes(adapterRamBytes)) + " GB",
-        Gpu when key is MinRefreshRate or MaxRefreshRate && !value.ToString()?.Contains(" Hz") is null or false =>
+        Gpu when key is MinRefreshRate or MaxRefreshRate && !value.Contains(" Hz") is false =>
             value + " Hz",
         Gpu when key is VideoModeDescription =>
-            GetFormattedVideoMode(value.ToString()!),
-        Storage when key is Size && long.TryParse(value.ToString(), out var storageBytes) =>
+            GetFormattedVideoMode(value!),
+        Storage when key is Size && long.TryParse(value, out var storageBytes) =>
             Math.Round(BytesToGigaBytes(storageBytes)) + " GB",
-        Memory when key is Capacity && long.TryParse(value.ToString(), out var capacityBytes) =>
+        Memory when key is Capacity && long.TryParse(value, out var capacityBytes) =>
             Math.Round(BytesToGigaBytes(capacityBytes)) + " GB",
-        Memory when key is Speed && long.TryParse(value.ToString(), out var memorySpeedHertz) =>
+        Memory when key is Speed && long.TryParse(value, out var memorySpeedHertz) =>
             memorySpeedHertz / 1000 + " Ghz",
-        _ => value.ToString() ?? string.Empty
+        _ => value ?? string.Empty
     };
 
 
@@ -54,6 +54,8 @@ public static partial class ComponentPropertyValueFormatter
 
         return regex.Replace(videoMode, formattedAmount);
     }
+
+
 
     [GeneratedRegex(@"\d+\s+(?=colors$)")]
     private static partial Regex ColorAmountRegex();
