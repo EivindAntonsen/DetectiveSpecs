@@ -36,7 +36,7 @@ public class HardwareInfoSerializer
     {
         _stringBuilder.AppendLine(component.ComponentType.ToString());
 
-        foreach (var (key, value) in component.Properties)
+        foreach (var (key, value) in component.Properties.OrderBy(keyValuePair => keyValuePair.Key))
             _stringBuilder.AppendLine($"  {key.ToString().PadRight(PadLength)}  {value}");
     }
 }

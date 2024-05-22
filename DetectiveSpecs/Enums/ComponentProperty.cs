@@ -6,6 +6,7 @@ public enum ComponentProperty
 {
     AdapterRAM,
     Capacity,
+    Caption,
     Description,
     DeviceID,
     DeviceLocator,
@@ -21,6 +22,8 @@ public enum ComponentProperty
     Name,
     NumberOfCores,
     NumberOfFunctionKeys,
+    Organization,
+    OSArchitecture,
     PartNumber,
     Partitions,
     PhysicalAdapter,
@@ -31,5 +34,6 @@ public enum ComponentProperty
     Speed,
     Status,
     Type,
+    Version,
     VideoModeDescription
 }

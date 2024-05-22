@@ -16,7 +16,8 @@ internal static class Queries
         { Network, "SELECT * FROM Win32_NetworkAdapter" },
         { Sound, "SELECT * FROM Win32_SoundDevice" },
         { Keyboard, "SELECT * FROM Win32_Keyboard" },
-        { Mouse, "SELECT * FROM Win32_PointingDevice" }
+        { Mouse, "SELECT * FROM Win32_PointingDevice" },
+        { ComponentType.OperatingSystem, "SELECT * FROM Win32_OperatingSystem" }
     };
 
 

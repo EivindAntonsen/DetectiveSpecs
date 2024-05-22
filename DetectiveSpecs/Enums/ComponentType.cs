@@ -14,7 +14,8 @@ public enum ComponentType
     Network,
     Sound,
     Keyboard,
-    Mouse
+    Mouse,
+    OperatingSystem
 }
 
 public static class ComponentExtensions
@@ -31,6 +32,7 @@ public static class ComponentExtensions
         Sound => [Name, Manufacturer],
         Keyboard => [Name, Description, Layout, NumberOfFunctionKeys],
         Mouse => [Name, Manufacturer, PointerType],
+        ComponentType.OperatingSystem => [Caption, ComponentProperty.Version, Manufacturer, OSArchitecture, Status],
         _ => throw new ArgumentOutOfRangeException(nameof(componentType), componentType, null)
     };
 }

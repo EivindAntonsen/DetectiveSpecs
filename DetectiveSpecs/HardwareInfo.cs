@@ -4,6 +4,55 @@ namespace DetectiveSpecs;
 
 public record HardwareInfo
 {
+    public HardwareInfo(params IEnumerable<Component>[] arraysOfComponents)
+    {
+        foreach (var component in arraysOfComponents
+                     .SelectMany(array => array)
+                     .GroupBy(component => component.ComponentType))
+        {
+            switch (component.Key)
+            {
+                case ComponentType.Motherboard:
+                    Motherboard = component;
+                    break;
+                case ComponentType.Gpu:
+                    Gpu = component;
+                    break;
+                case ComponentType.Cpu:
+                    Cpu = component;
+                    break;
+                case ComponentType.Storage:
+                    Storage = component;
+                    break;
+                case ComponentType.Memory:
+                    Memory = component;
+                    break;
+                case ComponentType.Optical:
+                    Optical = component;
+                    break;
+                case ComponentType.Network:
+                    Network = component;
+                    break;
+                case ComponentType.Sound:
+                    Sound = component;
+                    break;
+                case ComponentType.Keyboard:
+                    Keyboard = component;
+                    break;
+                case ComponentType.Mouse:
+                    Mouse = component;
+                    break;
+                case ComponentType.OperatingSystem:
+                    OperatingSystem = component;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+
+
     public HardwareInfo(IEnumerable<Component> components)
     {
         foreach (var component in components.GroupBy(component => component.ComponentType))
@@ -40,6 +89,9 @@ public record HardwareInfo
                 case ComponentType.Mouse:
                     Mouse = component;
                     break;
+                case ComponentType.OperatingSystem:
+                    OperatingSystem = component;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -58,8 +110,10 @@ public record HardwareInfo
     public IEnumerable<Component> Sound { get; } = new List<Component>();
     public IEnumerable<Component> Keyboard { get; } = new List<Component>();
     public IEnumerable<Component> Mouse { get; } = new List<Component>();
+    public IEnumerable<Component> OperatingSystem { get; } = new List<Component>();
 
     public IEnumerable<Component> GetAllComponents => Motherboard
+        .Concat(OperatingSystem)
         .Concat(Cpu)
         .Concat(Gpu)
         .Concat(Storage)

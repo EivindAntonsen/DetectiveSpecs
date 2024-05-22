@@ -1,4 +1,5 @@
-﻿using static DetectiveSpecs.Enums.ComponentProperty;
+﻿using DetectiveSpecs.Enums;
+using static DetectiveSpecs.Enums.ComponentProperty;
 using static DetectiveSpecs.Enums.ComponentType;
 
 namespace DetectiveSpecs;
@@ -36,16 +37,18 @@ internal static class Program
         var sound = WindowsHardwareInfoProvider.GetComponents(Sound).ToList();
         var keyboard = WindowsHardwareInfoProvider.GetComponents(Keyboard).ToList();
         var mouse = WindowsHardwareInfoProvider.GetComponents(Mouse).ToList();
+        var operatingSystem = WindowsHardwareInfoProvider.GetComponents(ComponentType.OperatingSystem).ToList();
 
-        return new HardwareInfo(motherBoard
-            .Concat(cpu)
-            .Concat(gpu)
-            .Concat(storage)
-            .Concat(memory)
-            .Concat(optical)
-            .Concat(network)
-            .Concat(sound)
-            .Concat(keyboard)
-            .Concat(mouse));
+        return new HardwareInfo(motherBoard,
+            operatingSystem,
+            cpu,
+            gpu,
+            storage,
+            memory,
+            optical,
+            network,
+            sound,
+            keyboard,
+            mouse);
     }
 }
