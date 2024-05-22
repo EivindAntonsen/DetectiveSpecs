@@ -5,6 +5,8 @@ param(
     [String]$version
 )
 
+Write-Host $workspace
+
 $exeFilePath = "${workspace}\Staging\Build\DetectiveSpecs-v${version}.exe"
 $zipFilePath = "${workspace}\Staging\Build\DetectiveSpecs-v${version}.zip"
 

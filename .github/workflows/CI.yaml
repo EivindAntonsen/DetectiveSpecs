@@ -17,6 +17,7 @@ jobs:
       - name: Extract version
         id: getversion
         run: |
+          Get-ChildItem 
           $xml = [xml](Get-Content DetectiveSpecs/DetectiveSpecs.csproj)
           $version = $xml.Project.PropertyGroup.Version
           Add-Content -Path $env:GITHUB_ENV -Value "VERSION=$version"
