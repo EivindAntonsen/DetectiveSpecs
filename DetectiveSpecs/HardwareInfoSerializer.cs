@@ -3,16 +3,16 @@ using DetectiveSpecs.Enums;
 
 namespace DetectiveSpecs;
 
-public class ComputerSpecSerializer
+public class HardwareInfoSerializer
 {
     private readonly StringBuilder _stringBuilder = new();
     public readonly int PadLength = GetPadLength();
 
 
 
-    public string Serialize(ComputerSpecs specs)
+    public string Serialize(HardwareInfo hardwareInfo)
     {
-        foreach (var component in specs.GetAllComponents)
+        foreach (var component in hardwareInfo.GetAllComponents)
             AppendComponent(component);
 
         return _stringBuilder.ToString();

@@ -1,6 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Management;
-using DetectiveSpecs.Enums;
+﻿using static DetectiveSpecs.Enums.ComponentProperty;
+using static DetectiveSpecs.Enums.ComponentType;
 
 namespace DetectiveSpecs;
 
@@ -10,8 +9,8 @@ internal static class Program
     {
         Console.WriteLine("Starting work on detecting components");
 
-        var computerSpecs = GetComputerSpecs();
-        var serializedText = new ComputerSpecSerializer().Serialize(computerSpecs);
+        var computerSpecs = GetHardwareInfo();
+        var serializedText = new HardwareInfoSerializer().Serialize(computerSpecs);
         var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
         var path = Path.Combine(currentDirectory, "ComputerInfo.txt");
 
@@ -24,109 +23,29 @@ internal static class Program
 
 
 
-    private static ComputerSpecs GetComputerSpecs()
+    private static HardwareInfo GetHardwareInfo()
     {
-        var cpu = GetComponentOfType(ComponentType.Cpu);
-        var gpu = GetMultipleComponentsOfType(ComponentType.Gpu);
-        var motherBoard = GetComponentOfType(ComponentType.Motherboard);
-        var storage = GetMultipleComponentsOfType(ComponentType.Storage);
-        var memory = GetMultipleComponentsOfType(ComponentType.Memory);
-        var optical = GetMultipleComponentsOfType(ComponentType.Optical);
-        var network = GetMultipleComponentsOfType(ComponentType.Network)
-            .Where(component => component.Properties[ComponentProperty.PhysicalAdapter] == "True");
-        var sound = GetMultipleComponentsOfType(ComponentType.Sound);
-        var keyboard = GetMultipleComponentsOfType(ComponentType.Keyboard);
-        var mouse = GetMultipleComponentsOfType(ComponentType.Mouse);
+        var cpu = WindowsHardwareInfoProvider.GetComponents(Cpu).ToList();
+        var gpu = WindowsHardwareInfoProvider.GetComponents(Gpu).ToList();
+        var motherBoard = WindowsHardwareInfoProvider.GetComponents(Motherboard).ToList();
+        var storage = WindowsHardwareInfoProvider.GetComponents(Storage).ToList();
+        var memory = WindowsHardwareInfoProvider.GetComponents(Memory).ToList();
+        var optical = WindowsHardwareInfoProvider.GetComponents(Optical).ToList();
+        var network = WindowsHardwareInfoProvider.GetComponents(Network)
+            .Where(component => component.Properties.TryGetValue(PhysicalAdapter, out string? value) && value == "True").ToList();
+        var sound = WindowsHardwareInfoProvider.GetComponents(Sound).ToList();
+        var keyboard = WindowsHardwareInfoProvider.GetComponents(Keyboard).ToList();
+        var mouse = WindowsHardwareInfoProvider.GetComponents(Mouse).ToList();
 
-        return new ComputerSpecs
-        {
-            Cpu = cpu,
-            Gpu = gpu,
-            Motherboard = motherBoard,
-            Storage = storage,
-            Memory = memory,
-            Optical = optical,
-            Network = network,
-            Sound = sound,
-            Keyboard = keyboard,
-            Mouse = mouse
-        };
-    }
-
-
-
-    private static Dictionary<ComponentProperty, string> ReadComponentProperties(
-        ComponentType componentType,
-        ManagementBaseObject managementObject)
-    {
-        Console.WriteLine($"Reading component properties of {componentType}.");
-
-        return componentType
-            .GetPropertyNames()
-            .Aggregate(new Dictionary<ComponentProperty, string>(), (properties, key) =>
-            {
-                if (!TryGetValue(key, managementObject, out var value) || string.IsNullOrWhiteSpace(value))
-                    return properties;
-
-                var formattedValue = ComponentPropertyValueFormatter.Format(componentType, key, value);
-
-                properties.Add(key, formattedValue);
-
-                return properties;
-            });
-    }
-
-
-
-    private static IEnumerable<Component> GetMultipleComponentsOfType(ComponentType componentType)
-    {
-        var queryString = Queries.ForComponent(componentType);
-        var searcher = new ManagementObjectSearcher(queryString);
-
-        foreach (var managementBaseObject in searcher.Get())
-        {
-            var properties = ReadComponentProperties(componentType, managementBaseObject);
-
-            yield return new Component(componentType, properties);
-        }
-    }
-
-
-
-    private static Component? GetComponentOfType(ComponentType componentType)
-    {
-        var queryString = Queries.ForComponent(componentType);
-        var searcher = new ManagementObjectSearcher(queryString);
-
-        var searchResult = searcher.Get()
-            .OfType<ManagementBaseObject>()
-            .FirstOrDefault();
-
-        if (searchResult is null)
-            return null;
-
-        var properties = ReadComponentProperties(componentType, searchResult);
-
-        return new Component(componentType, properties);
-    }
-
-
-
-    private static bool TryGetValue(
-        ComponentProperty key,
-        ManagementBaseObject managementBaseObject,
-        [NotNullWhen(true)] out string? value)
-    {
-        try
-        {
-            var information = managementBaseObject[key.ToString()];
-            value = Convert.ToString(information)?.Trim();
-            return value is not null;
-        }
-        catch (ManagementException exception) when (exception.ErrorCode == ManagementStatus.NotFound)
-        {
-            value = null;
-            return false;
-        }
+        return new HardwareInfo(motherBoard
+            .Concat(cpu)
+            .Concat(gpu)
+            .Concat(storage)
+            .Concat(memory)
+            .Concat(optical)
+            .Concat(network)
+            .Concat(sound)
+            .Concat(keyboard)
+            .Concat(mouse));
     }
 }

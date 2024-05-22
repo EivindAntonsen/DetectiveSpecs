@@ -30,14 +30,20 @@ public static partial class ComponentPropertyValueFormatter
             Math.Round(BytesToGigaBytes(capacityBytes)) + " GB",
         Memory when key is Speed && long.TryParse(value, out var memorySpeedHertz) =>
             memorySpeedHertz / 1000 + " Ghz",
-        _ => value ?? string.Empty
+        _ => value
     };
 
 
 
-    private static string GetFormattedAmount(long l) => l > 1_000_000_000 ? l / 1_000_000_000 + "b " : l / 1_000_000 + "m ";
+    private static string GetFormattedAmount(long l) =>
+        l > 1_000_000_000
+            ? l / 1_000_000_000 + "b "
+            : l / 1_000_000 + "m ";
 
-    private static double BytesToGigaBytes(long bytes) => Convert.ToDouble(bytes) / 1024 / 1024 / 1024;
+
+
+    private static double BytesToGigaBytes(long bytes) =>
+        Convert.ToDouble(bytes) / 1024 / 1024 / 1024;
 
 
 

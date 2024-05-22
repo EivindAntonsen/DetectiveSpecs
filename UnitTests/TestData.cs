@@ -9,19 +9,21 @@ public static class TestData
     /// Creates an instance of ComputerSpecs with default values.
     /// </summary>
     /// <returns>A new instance of the ComputerSpecs class.</returns>
-    public static ComputerSpecs CreateComputerSpecs() => new()
-    {
-        Cpu = CreateComponent(ComponentType.Cpu),
-        Gpu = [CreateComponent(ComponentType.Gpu)],
-        Motherboard = CreateComponent(ComponentType.Motherboard),
-        Storage = [CreateComponent(ComponentType.Storage)],
-        Memory = [CreateComponent(ComponentType.Memory)],
-        Optical = [CreateComponent(ComponentType.Optical)],
-        Network = [CreateComponent(ComponentType.Network)],
-        Sound = [CreateComponent(ComponentType.Sound)],
-        Keyboard = [CreateComponent(ComponentType.Keyboard)],
-        Mouse = [CreateComponent(ComponentType.Mouse)]
-    };
+    public static HardwareInfo CreateComputerSpecs() => new(
+        new List<Component>
+        {
+            CreateComponent(ComponentType.Cpu),
+            CreateComponent(ComponentType.Gpu),
+            CreateComponent(ComponentType.Motherboard),
+            CreateComponent(ComponentType.Storage),
+            CreateComponent(ComponentType.Memory),
+            CreateComponent(ComponentType.Optical),
+            CreateComponent(ComponentType.Network),
+            CreateComponent(ComponentType.Sound),
+            CreateComponent(ComponentType.Keyboard),
+            CreateComponent(ComponentType.Mouse)
+        }
+    );
 
 
 
