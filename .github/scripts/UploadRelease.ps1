@@ -6,7 +6,9 @@ param(
 )
 
 $exeFilePath = "${workspace}\Staging\Build\DetectiveSpecs-v${version}.exe"
-$zipFilePath = "${workspace}\Staging\Build\DetectiveSpecs.zip"
+$zipFilePath = "${workspace}\Staging\Build\DetectiveSpecs-v${version}.zip"
+
+Get-ChildItem "${workspace}\Staging\Build\"
 
 if (Test-Path $zipFilePath) {
     Remove-Item -Path $zipFilePath
