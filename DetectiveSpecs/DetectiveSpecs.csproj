@@ -2,14 +2,25 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>1.1.1</Version>
-        <LangVersion>12</LangVersion>
+        <Version>1.2.1</Version>
+        <LangVersion>14</LangVersion>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>detective-specs</ToolCommandName>
+        <PackageId>DetectiveSpecs</PackageId>
+        <Authors>Eivind Antonsen</Authors>
+        <Description>A tool to detect and serialize computer hardware information.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/EivindAntonsen/DetectiveSpecs</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/EivindAntonsen/DetectiveSpecs</RepositoryUrl>
+        <PackageTags>hardware-info;system-info;wmi;cli;tool</PackageTags>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
       <PackageReference Include="System.Management" Version="8.0.0" />
     </ItemGroup>
 

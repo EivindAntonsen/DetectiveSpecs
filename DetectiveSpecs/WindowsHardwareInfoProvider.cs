@@ -9,7 +9,7 @@ public static class WindowsHardwareInfoProvider
     public static IEnumerable<Component> GetComponents(ComponentType componentType)
     {
         var queryString = Queries.ForComponent(componentType);
-        var searcher = new ManagementObjectSearcher(queryString);
+        using var searcher = new ManagementObjectSearcher(queryString);
 
         foreach (var managementBaseObject in searcher.Get())
         {

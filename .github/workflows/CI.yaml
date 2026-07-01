@@ -1,80 +1,75 @@
-﻿name: .Net
+﻿name: CI/CD
 
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: windows-latest
     steps:
-
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Extract version
-        id: getversion
-        run: |
-          Get-ChildItem 
-          $xml = [xml](Get-Content DetectiveSpecs/DetectiveSpecs.csproj)
-          $version = $xml.Project.PropertyGroup.Version
-          Add-Content -Path $env:GITHUB_ENV -Value "VERSION=$version"
-        shell: pwsh
-
-      - name: Check version
-        id: checkversion
-        continue-on-error: true
-        run: |
-          pwsh ./.github/scripts/CheckVersion.ps1 -githubRepository ${{ github.repository }} -version $env:VERSION -accessToken $env:ACCESS_TOKEN
-        shell: pwsh
-        env:
-          VERSION: ${{ env.VERSION }}
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-
-      - name: Setup .NET 8.0
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.x.x
+          dotnet-version: 10.0.x
 
-      - name: Setup NuGet.exe for use with actions
-        uses: NuGet/setup-nuget@v2
-
-      - name: Configure github packages as nuget source
-        env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: |
-          $uri = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-          dotnet nuget add source --username ${{ github.actor }} --password $env:ACCESS_TOKEN --store-password-in-clear-text --name github $uri
-
-      - name: Restore dependencies
+      - name: Restore
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build --verbosity normal
 
-      - name: Publish
-        run: pwsh ./.github/scripts/Publish.ps1 -project "DetectiveSpecs/DetectiveSpecs.csproj" -version $env:VERSION -workspacePath ${{ runner.workspace }}
+      - name: Pack
+        run: dotnet pack DetectiveSpecs/DetectiveSpecs.csproj --configuration Release --no-build --output nupkg
 
-      - name: Upload Artifact
+      - name: Upload nupkg
         uses: actions/upload-artifact@v4
         with:
-          name: DetectiveSpecs
-          path: ${{ runner.workspace }}/Staging/Build/
-          
-      - name: Create Github Release
+          name: nupkg
+          path: nupkg/*.nupkg
+
+  publish:
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download nupkg
+        uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: nupkg
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+
+      - name: Publish to NuGet
+        run: dotnet nuget push nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+        continue-on-error: true
+
+      - name: Build Self-Contained Exe
+        run: dotnet publish DetectiveSpecs/DetectiveSpecs.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishReadyToRun=true --output publish
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }} # Or extract from csproj if preferred
+          name: Release v${{ github.run_number }}
+          files: |
+            publish/DetectiveSpecs.exe
+            nupkg/*.nupkg
         env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          VERSION: ${{ env.VERSION }}
-        run: pwsh ./.github/scripts/CreateRelease.ps1 -accessToken $env:ACCESS_TOKEN -version $env:VERSION
-        
-      - name: Upload Asset to Release
-        env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          VERSION: ${{ env.VERSION }}
-          RELEASE_ID: ${{ env.RELEASE_ID }}
-        run : pwsh ./.github/scripts/UploadRelease.ps1 -accessToken $env:ACCESS_TOKEN -workspace ${{ runner.workspace }} -releaseId $env:RELEASE_ID -version $env:VERSION
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

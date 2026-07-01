@@ -4,123 +4,44 @@ namespace DetectiveSpecs;
 
 public record HardwareInfo
 {
+    private readonly Dictionary<ComponentType, List<Component>> _components;
+
     public HardwareInfo(params IEnumerable<Component>[] arraysOfComponents)
-    {
-        foreach (var component in arraysOfComponents
-                     .SelectMany(array => array)
-                     .GroupBy(component => component.ComponentType))
-        {
-            switch (component.Key)
-            {
-                case ComponentType.Motherboard:
-                    Motherboard = component;
-                    break;
-                case ComponentType.Gpu:
-                    Gpu = component;
-                    break;
-                case ComponentType.Cpu:
-                    Cpu = component;
-                    break;
-                case ComponentType.Storage:
-                    Storage = component;
-                    break;
-                case ComponentType.Memory:
-                    Memory = component;
-                    break;
-                case ComponentType.Optical:
-                    Optical = component;
-                    break;
-                case ComponentType.Network:
-                    Network = component;
-                    break;
-                case ComponentType.Sound:
-                    Sound = component;
-                    break;
-                case ComponentType.Keyboard:
-                    Keyboard = component;
-                    break;
-                case ComponentType.Mouse:
-                    Mouse = component;
-                    break;
-                case ComponentType.OperatingSystem:
-                    OperatingSystem = component;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-    }
-
-
+        : this(arraysOfComponents.SelectMany(x => x)) { }
 
     public HardwareInfo(IEnumerable<Component> components)
     {
-        foreach (var component in components.GroupBy(component => component.ComponentType))
-        {
-            switch (component.Key)
-            {
-                case ComponentType.Motherboard:
-                    Motherboard = component;
-                    break;
-                case ComponentType.Gpu:
-                    Gpu = component;
-                    break;
-                case ComponentType.Cpu:
-                    Cpu = component;
-                    break;
-                case ComponentType.Storage:
-                    Storage = component;
-                    break;
-                case ComponentType.Memory:
-                    Memory = component;
-                    break;
-                case ComponentType.Optical:
-                    Optical = component;
-                    break;
-                case ComponentType.Network:
-                    Network = component;
-                    break;
-                case ComponentType.Sound:
-                    Sound = component;
-                    break;
-                case ComponentType.Keyboard:
-                    Keyboard = component;
-                    break;
-                case ComponentType.Mouse:
-                    Mouse = component;
-                    break;
-                case ComponentType.OperatingSystem:
-                    OperatingSystem = component;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+        _components = components
+            .GroupBy(c => c.ComponentType)
+            .ToDictionary(g => g.Key, g => g.ToList());
     }
 
+    private IEnumerable<Component> Get(ComponentType type) =>
+        _components.TryGetValue(type, out var list) ? list : [];
 
+    public IEnumerable<Component> Motherboard => Get(ComponentType.Motherboard);
+    public IEnumerable<Component> Gpu => Get(ComponentType.Gpu);
+    public IEnumerable<Component> Cpu => Get(ComponentType.Cpu);
+    public IEnumerable<Component> Storage => Get(ComponentType.Storage);
+    public IEnumerable<Component> Memory => Get(ComponentType.Memory);
+    public IEnumerable<Component> Optical => Get(ComponentType.Optical);
+    public IEnumerable<Component> Network => Get(ComponentType.Network);
+    public IEnumerable<Component> Sound => Get(ComponentType.Sound);
+    public IEnumerable<Component> Keyboard => Get(ComponentType.Keyboard);
+    public IEnumerable<Component> Mouse => Get(ComponentType.Mouse);
+    public IEnumerable<Component> OperatingSystem => Get(ComponentType.OperatingSystem);
 
-    public IEnumerable<Component> Motherboard { get; } = new List<Component>();
-    public IEnumerable<Component> Gpu { get; } = new List<Component>();
-    public IEnumerable<Component> Cpu { get; } = new List<Component>();
-    public IEnumerable<Component> Storage { get; } = new List<Component>();
-    public IEnumerable<Component> Memory { get; } = new List<Component>();
-    public IEnumerable<Component> Optical { get; } = new List<Component>();
-    public IEnumerable<Component> Network { get; } = new List<Component>();
-    public IEnumerable<Component> Sound { get; } = new List<Component>();
-    public IEnumerable<Component> Keyboard { get; } = new List<Component>();
-    public IEnumerable<Component> Mouse { get; } = new List<Component>();
-    public IEnumerable<Component> OperatingSystem { get; } = new List<Component>();
-
-    public IEnumerable<Component> GetAllComponents => Motherboard
-        .Concat(OperatingSystem)
-        .Concat(Cpu)
-        .Concat(Gpu)
-        .Concat(Storage)
-        .Concat(Memory)
-        .Concat(Network)
-        .Concat(Optical)
-        .Concat(Sound)
-        .Concat(Keyboard)
-        .Concat(Mouse);
-};
+    public IEnumerable<Component> GetAllComponents => [
+        .. Motherboard,
+        .. OperatingSystem,
+        .. Cpu,
+        .. Gpu,
+        .. Storage,
+        .. Memory,
+        .. Network,
+        .. Optical,
+        .. Sound,
+        .. Keyboard,
+        .. Mouse
+    ];
+}
